@@ -4,7 +4,7 @@
   "description": "UI Framework for Zepp OS",
   "main": "dist/index.js",
   "type": "module",
-  "types": "./src",
+  "types": "./types",
   "repository": "https://www.github.com/CuberQAQ/AsukaUI",
   "author": "CuberQAQ",
   "license": "MIT",
@@ -13,5 +13,8 @@
   },
   "scripts": {
     "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@zeppos/device-types": "^3.0.0"
   }
 }
