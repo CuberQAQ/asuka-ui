@@ -8,7 +8,7 @@ import { AsukaNode } from './AsukaDOM.bak';
  * @param ref 要删除的元素 或者 要插入元素的后面的元素
  * @param add 要插入的元素
  * @param byValueOnly 返回值为
- * @returns 操作失败时，返回`-1`；否则当
+ * @returns 操作失败时，返回`-1`；否则返回其在数组中对应的原索引
  */
 export function splice<T>(arr: T[], ref: T, add?: T, byValueOnly?: boolean) {
   let i: number = (arr ? findWhere(arr, ref, true, byValueOnly) : -1) as number;

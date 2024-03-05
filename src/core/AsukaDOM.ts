@@ -6,7 +6,7 @@ import { assert } from '../debug/index';
 import { objectTag } from '../decorator/debug';
 import { Constraints, Coordinate, Size } from './AsukaLayout';
 import { NodeType, isRenderNode } from './constants';
-import { splice } from './utils';
+import { findWhere, splice } from './utils';
 import * as hmUI from '@zos/ui';
 
 /**
@@ -15,6 +15,19 @@ import * as hmUI from '@zos/ui';
 export abstract class AsukaNode {
   /** 父节点 */
   public parentNode: AsukaNode | null = null;
+
+  /**
+   * **父节点数据插槽**
+   * @description
+   * 用于存储父节点希望子节点存储的信息。
+   *
+   * 由于子模型无关、布局算法高度自定义等特点，出现父节点需要子节点存储数据的情况十分常见，故提供本插槽属性。
+   * 将在`mountChild`时调用的`_setupMountingChild`中赋值为`{}`(空对象)进行初始化，并在`unmountChild`时调用的`_setupUnmounting`中赋值为`null`进行清除。
+   * 其他任何时候，框架不会访问或改变它。
+   *
+   * 举例：多个采用双向链表存储子节点时诸如`nextSibling`，`previousSibling`等。
+   */
+  parentData: any;
 
   /**
    * **获取子节点的下一个下一个兄弟节点**
@@ -190,7 +203,7 @@ export abstract class RenderNode extends AsukaNode {
   /**
    * **当元素所在树由孤立变为可渲染(即渲染树不与AsukaPage连接)**
    * @description
-   * 该方法会通过`visitChildren`遍历所有的子`RenderNode`，并调用它们的`attach`方法。
+   * 该方法会通过`visitChildren`遍历所有的子`RenderNode`，并调用它们的`attach`方法、更新节点深度.
    *
    * 本方法需要传递attach调用给子节点以保证子节点`_attached`的正确性。
    *
@@ -207,8 +220,12 @@ export abstract class RenderNode extends AsukaNode {
    */
   attach(): void {
     assert(!this._attached);
+    assert(
+      this.parentNode != null && (this.parentNode as any)._depth !== undefined,
+    );
     this._attached = true;
-
+    // 重新计算节点的深度
+    this._depth = (this.parentNode as RenderNode)._depth + 1;
     // 如果该节点在孤立状态时被上了布局脏标记（如果是`null`，`markParentNeedsLayout`的调用会传递至孤立树的根节点，
     // 保证沿途每个节点都被标记为脏，并在`mountChild`后得到向下传递的重布局调用）
     assert(() => {
@@ -243,6 +260,13 @@ export abstract class RenderNode extends AsukaNode {
   detach(): void {
     assert(this._attached);
     this._attached = false;
+    // 注：没必要判断了。因为_core._layout可以判断你有没有_attached。就算你被移动改变了深度，排序也是_layout里面排的
+    // // 如果该节点可能注册了重布局节点
+    // if(this._relayoutBoundary === this && this._needsLayout) {
+    //   assert(this._core != null)
+    //   assert(findWhere(this._core!._nodesNeedsLayout, this, true) !== -1)
+    //   this._core!.removeRelayoutNode(this)
+    // }
     // assert(parent === null || this._attached === (this.parentNode as RenderNode)._attached)
   }
 
@@ -259,6 +283,8 @@ export abstract class RenderNode extends AsukaNode {
    * @description
    * 用于挂载节点时设置子节点的插槽属性(parentNode和parentData)等，并将本节点布局标记为脏.
    *
+   * **请在使用parentData和parentNode前调用**
+   *
    * 通常被`mountChild`调用.
    *
    * 不负责处理 attach. 请在`mountChild`时自行处理.
@@ -266,10 +292,10 @@ export abstract class RenderNode extends AsukaNode {
    */
   protected _setupMountingChild(child: AsukaNode) {
     child.parentNode = this;
+    child.parentData = {};
     if (isRenderNode(child)) {
       // (child as RenderNode)._owner = this._owner;
       (child as RenderNode).onMount();
-      (child as RenderNode).parentData = {};
       // (child as RenderNode)._cleanRelayoutBoundary();
     }
     this.markNeedsLayout(); // 或许将该职责转移到`mountChild`上
@@ -280,6 +306,8 @@ export abstract class RenderNode extends AsukaNode {
    * @description
    * 用于取消挂载节点时设置子节点的插槽属性(parentNode和parentData)，并清除子树上即将失效(也就是指向本节点或者本节点的祖先)的`_relayoutBoundary`。
    *
+   * **请在不使用parentData和parentNode时调用**
+   *
    * 通常被`unmountChild`调用.
    *
    * 不负责处理 detach. 请在`unmountChild`自行处理
@@ -287,9 +315,9 @@ export abstract class RenderNode extends AsukaNode {
    */
   protected _setupUnmountingChild(child: AsukaNode) {
     child.parentNode = null;
+    child.parentData = null;
     if (isRenderNode(child)) {
       (child as RenderNode).onUnmount();
-      (child as RenderNode).parentData = null;
       // 清除子树上即将失效(也就是指向本节点或者本节点的祖先)的`_relayoutBoundary`
       (child as RenderNode)._cleanRelayoutBoundary();
     }
@@ -360,6 +388,21 @@ export abstract class RenderNode extends AsukaNode {
    * 若为孤立且拥有脏标记的节点，在转为非孤立状态后应立即请求放置，并在下一个JS事件循环时的`place`时执行推送操作，并清除脏标记。
    */
   _mustCommit: boolean = false;
+
+  /**
+   * **本节点的深度**
+   *
+   * 定义`AsukaPage`的深度为`0`.
+   *
+   * 仅当`_attached`为`true`，即不为孤立节点时有效
+   *
+   * 主要用于在`AsukaPage`执行`layout`和`place`操作时确定先后顺序（深度小的节点先，深度大的节点后），保证不重复计算并正确.
+   *
+   * 在`attach`时更新
+   * @todo 考虑在两次`AsukaPage#requestRelayout`或者`AsukaPage#requestPlace`直接取消挂载并再次挂载节点，
+   * 使其深度发生改变，如果保证这种情况的布局结果正确？
+   */
+  _depth: number = 0;
 
   /**
    * **本节点尺寸**
@@ -577,19 +620,6 @@ export abstract class RenderNode extends AsukaNode {
   sizedByParent: boolean = false;
 
   /**
-   * **父节点数据插槽**
-   * @description
-   * 用于存储父节点希望子节点存储的信息。
-   *
-   * 由于子模型无关、布局算法高度自定义等特点，出现父节点需要子节点存储数据的情况十分常见，故提供本插槽属性。
-   * 将在`mountChild`时调用的`_setupMountingChild`中赋值为`{}`(空对象)进行初始化，并在`unmountChild`时调用的`_setupUnmounting`中赋值为`null`进行清除。
-   * 其他任何时候，框架不会访问或改变它。
-   *
-   * 举例：多个采用双向链表存储子节点时诸如`nextSibling`，`previousSibling`等。
-   */
-  parentData: any;
-
-  /**
    * **有条件地更新子树重布局边界**
    * @description
    * 当节点的_relayoutBoundary不是自己，且父节点的_relayoutBoundary与自己的不相等时，更新并传递给子节点
@@ -680,6 +710,19 @@ export abstract class RenderNode extends AsukaNode {
     }
     this.performLayout();
     // markNeedsSemanticsUpdate
+    this._needsLayout = false;
+  }
+
+  /**
+   * **在不重新确定尺寸的情况下重新布局**
+   *
+   * 不会检查`_needsLayout`，请调用前检查并决定是否剪枝
+   */
+  _layoutWithoutResize() {
+    // TODO 检查是否有错
+    assert(this._relayoutBoundary === this);
+    assert(this.size != null);
+    this.performLayout();
     this._needsLayout = false;
   }
 
@@ -978,6 +1021,8 @@ class RenderView extends RenderNode {
     assert(this._rootNode !== null);
     if (this._rootNode !== null) handler(this._rootNode!);
   }
+  setSize(size: Size) {}
+  setOffset(offset: Coordinate) {}
 }
 
 export interface WidgetFactory {
@@ -995,7 +1040,10 @@ export class AsukaPage {
     // TODO
     this._activeFrame = frame;
   }
-  createFrame(mount: WidgetFactory = hmUI): RenderView {
+  createFrame(
+    mount: WidgetFactory = hmUI,
+    { size, offset }: { size?: Size; offset?: Coordinate },
+  ): RenderView {
     let frame = new RenderView();
     return frame;
   }
@@ -1020,7 +1068,14 @@ export class AsukaPage {
    * **添加需要重新布局的节点**
    */
   addRelayoutNode(node: RenderNode) {
+    assert(findWhere(this._nodesNeedsLayout, node, true) === -1);
     this._nodesNeedsLayout.push(node);
+  }
+  /**
+   * **移除需要重新布局的节点**
+   */
+  removeRelayoutNode(node: RenderNode): boolean {
+    return splice(this._nodesNeedsLayout, node) !== -1;
   }
   /**
    * **请求重新布局**
@@ -1034,7 +1089,14 @@ export class AsukaPage {
    * **添加需要重新布局的节点**
    */
   addPlaceNode(node: RenderNode) {
+    assert(findWhere(this._nodesNeedsPlace, node, true) === -1);
     this._nodesNeedsPlace.push(node);
+  }
+  /**
+   * **移除需要重新布局的节点**
+   */
+  removePlaceNode(node: RenderNode): boolean {
+    return splice(this._nodesNeedsPlace, node) !== -1;
   }
   /**
    * **请求重新布局**
@@ -1056,7 +1118,22 @@ export class AsukaPage {
   _layoutAndPlace() {
     // TODO
     this._asyncHandler = null;
-    // relayout
-    // place
+    this._layout();
+    this._place();
+  }
+  _layout() {
+    // TODO 检查
+    // 按深度从小到大排序
+    this._nodesNeedsLayout.sort((node1, node2) => node1._depth - node2._depth);
+    for (let node of this._nodesNeedsLayout) {
+      if (node._needsLayout && node._attached) node._layoutWithoutResize();
+    }
+  }
+  _place() {
+    // TODO 检查
+    this._nodesNeedsPlace.sort((node1, node2) => node1._depth - node2._depth);
+    for (let node of this._nodesNeedsLayout) {
+      if (node._needsPlace && node._attached) node.place();
+    }
   }
 }
