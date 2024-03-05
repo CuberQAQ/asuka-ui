@@ -5,10 +5,24 @@
 //   maxWidth: number;
 // }
 
+import { assert } from '../debug/index';
+
 /**
  * **布局约束类**
- * @description
- * 保存了布局时长宽分别允许的范围。在布局时，由父节点至子节点向下逐层传递
+ * @description 布局约束，是指该节点的尺寸的允许范围。
+ * 布局约束由`minHeight`，`maxHeight`，`minWidth`和`maxWidth`四个属性构成，详见`Constraints`
+ *
+ * 符合该约束的尺寸满足`minHeight <= height <= maxHeight`且`minWidth <= width <= maxWidth`.
+ *
+ * 当`minHeight == maxHeight`且`minWidth == maxWidth`时，称该约束为*严格约束*，意味着满足该约束的尺寸仅有一种.
+ *
+ * 当`minHeight == 0`且`minWidth == 0`时，该约束为*宽松约束*，意味着没有最小尺寸限制.
+ *
+ * **一个节点的最终尺寸必须符合其父节点传递的布局约束.**
+ *
+ * 框架保证所有`Constraints`类型的约束合理且有效，但请注意无穷大约束的处理。无穷大的尺寸将导致错误。
+ *
+ * @todo 处理`NaN`的情况
  */
 export class Constraints {
   minHeight: number;
@@ -26,6 +40,7 @@ export class Constraints {
     minWidth?: number;
     maxWidth?: number;
   }) {
+    // TODO 处理 NaN 的情况
     if (minHeight < 0) minHeight = 0;
     if (minWidth < 0) minWidth = 0;
     if (maxHeight < minHeight) maxHeight = minHeight;
@@ -89,8 +104,82 @@ export class Constraints {
   }
 }
 
+export class Size {
+  static equals(size1: Size | null, size2: Size | null): boolean {
+    if (size1 == null && size2 == null) return true;
+    else if (size1 == null || size2 == null) return false;
+    return size1.width === size2.width && size1.height === size2.height;
+  }
+  static isValid(size: Size | null) {
+    // NaN>=0 -> false; 负无穷>=0 -> false; isFinite(正无穷) -> false.
+    return (
+      size != null &&
+      size.height >= 0 &&
+      size.width >= 0 &&
+      isFinite(size.height) &&
+      isFinite(size.width)
+    );
+  }
+  static copy(size: Size) {
+    assert(size != null);
+    return { ...size };
+  }
+  /**
+   * **分别相加两个`Size`对象的长和宽，并返回一个新对象.**
+   *
+   * 注意
+   * - 传递空值会报错，但没判断是否合法.
+   * @param size1
+   * @param size2
+   * @returns 累加后的新对象
+   */
+  static add(size1: Size, size2: Size): Size {
+    assert(size1 != null && size2 != null);
+    return {
+      width: size1.width + size2.width,
+      height: size1.height + size2.height,
+    };
+  }
+}
 
 export interface Size {
   width: number;
   height: number;
+}
+
+export interface Coordinate {
+  x: number;
+  y: number;
+}
+
+export class Coordinate {
+  static copy(coord: Coordinate) {
+    assert(coord != null);
+    return { ...coord };
+  }
+  static isValid(coord: Coordinate | null) {
+    // isFinite(NaN) -> false
+    return coord != null && isFinite(coord.x) && isFinite(coord.y);
+  }
+  static equals(coord1: Coordinate | null, coord2: Coordinate | null) {
+    if (coord1 == null && coord2 == null) return true;
+    else if (coord1 == null || coord2 == null) return false;
+    return coord1.x === coord2.x && coord1.y === coord2.y;
+  }
+  /**
+   * **分别相加两个`Coordinate`对象的`x`和`y`，并返回一个新对象.**
+   *
+   * 注意
+   * - 传递空值会报错，但没判断是否合法.
+   * @param coord1
+   * @param coord2
+   * @returns 累加后的新对象
+   */
+  static add(coord1: Coordinate, coord2: Coordinate): Coordinate {
+    assert(coord1 != null && coord2 != null);
+    return {
+      x: coord1.x + coord2.x,
+      y: coord1.y + coord2.y,
+    };
+  }
 }
