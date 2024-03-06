@@ -1,4 +1,3 @@
-import { AsukaNode } from './AsukaDOM';
 /**
  * **向数组中插入或删除一个元素**
  * @description
@@ -7,7 +6,7 @@ import { AsukaNode } from './AsukaDOM';
  * @param ref 要删除的元素 或者 要插入元素的后面的元素
  * @param add 要插入的元素
  * @param byValueOnly 返回值为
- * @returns 操作失败时，返回`-1`；否则当
+ * @returns 操作失败时，返回`-1`；否则返回其在数组中对应的原索引
  */
 export declare function splice<T>(arr: T[], ref: T, add?: T, byValueOnly?: boolean): number;
 /**
@@ -19,7 +18,5 @@ export declare function splice<T>(arr: T[], ref: T, add?: T, byValueOnly?: boole
  * @returns 当`returnIndex`为true时，返回目标元素的数组索引，不存在则返回`-1`；当`returnIndex`为`false`时，返回目标元素本身，不存在则返回`undefined`
  */
 export declare function findWhere<T>(arr: T[], ref: T | ((item: T) => boolean), returnIndex: boolean, byValueOnly?: boolean): number | T;
-export declare function isElement(node: AsukaNode): boolean;
-export declare function isTextNode(node: AsukaNode): boolean;
 export declare function parseDimension(v: string | number): number;
 //# sourceMappingURL=utils.d.ts.map

@@ -5,7 +5,7 @@
 import { getDeviceInfo } from '@zos/device';
 import { assert, reportError } from '../debug/index';
 import { objectTag } from '../decorator/debug';
-import { Constraints, Coordinate, Size } from './AsukaLayout';
+import { Constraints, Coordinate, Size } from './layout';
 import { NodeType, isRenderNode } from './constants';
 import { findWhere, splice } from './utils';
 import * as hmUI from '@zos/ui';
@@ -194,13 +194,25 @@ export abstract class RenderNode extends AsukaNode {
    * @description
    * 即当被作为`mountChild()`的参数并成为子节点时调用。调用时parentNode已为新父元素。
    */
-  abstract onMount(): void;
+  onMount(): void {}
   /**
    *  **当元素被从Element树上取消挂载**
    * @description
    * 即当被作为`unmountChild()`的参数时调用。调用时parentNode已为null。
    */
-  abstract onUnmount(): void;
+  onUnmount(): void {}
+  /**
+   *  **当元素与`AsukaUI`连接（不再孤立）**
+   * @description
+   * 通常被`attach`调用
+   */
+  onAttach(): void {}
+  /**
+   *  **当元素不再与`AsukaUI`连接（变为孤立）**
+   * @description
+   * 通常被`detach`调用
+   */
+  onDetach(): void {}
   /**
    * **当元素所在树由孤立变为可渲染(即渲染树不与AsukaUI连接)**
    * @description
@@ -227,6 +239,8 @@ export abstract class RenderNode extends AsukaNode {
     this._attached = true;
     // 重新计算节点的深度
     this._depth = (this.parentNode as RenderNode)._depth + 1;
+
+    this.onAttach();
     // 如果该节点在孤立状态时被上了布局脏标记（如果是`null`，`markParentNeedsLayout`的调用会传递至孤立树的根节点，
     // 保证沿途每个节点都被标记为脏，并在`mountChild`后得到向下传递的重布局调用）
     assert(() => {
@@ -250,7 +264,7 @@ export abstract class RenderNode extends AsukaNode {
       this._needsPlace = false;
       this.markNeedsPlace();
     }
-    this.markMustCommit();
+    // this.markMustCommit();
     this.visitChildren((child) => child.attach());
   }
 
@@ -261,6 +275,7 @@ export abstract class RenderNode extends AsukaNode {
   detach(): void {
     assert(this._attached);
     this._attached = false;
+    this.onDetach();
     this.visitChildren((child) => child.attach());
     // 注：没必要判断了。因为_core._layout可以判断你有没有_attached。就算你被移动改变了深度，排序也是_layout里面排的
     // // 如果该节点可能注册了重布局节点
@@ -836,7 +851,7 @@ export abstract class RenderNode extends AsukaNode {
 
   /**
    * **重新确定尺寸**
-   * @description
+   *
    * 仅当`sizedByParent`为`true`时会被调用.
    *
    * 应当只使用父节点传递的布局约束计算节点，而不使用本节点的任何信息. 否则，请保持`sizedByParent`设为`false`，并在`performLayout`中确认尺寸.
@@ -847,7 +862,7 @@ export abstract class RenderNode extends AsukaNode {
   abstract performResize(): void;
   /**
    * **布局操作**
-   * @description
+   *
    * 本方法的通常职责：
    * 1. 计算子节点的约束，调用其`layout`方法，使子节点计算尺寸.
    * 2. 确定自己的尺寸，并将结果赋值给`this.size`
@@ -1053,39 +1068,13 @@ export class AsukaEvent {
   }
 }
 
-export abstract class RenderNative extends RenderNode {
-  // TODO layout type
-  /**
-   * **创建组件或更新布局**
-   * @description
-   * 当布局更新或者初始化时调用。不应在此方法内修改已有属性，即使为初始化时（因为有可能再次调用`onCommit`）
-   * @param layout 布局信息
-   * @param initial 是否为初始化
-   * @param widgetFactory 控件工厂（仅应在onCommit调用开始到onDestory调用期间使用，因为其他时候可能发生改变）
-   */
-  abstract onCommit(
-    layout: any,
-    initial?: boolean,
-    widgetFactory?: WidgetFactory,
-  ): void;
-  /**
-   * **删除组件**
-   * @description
-   * 当控件被移出可渲染树时调用。不应在此方法内修改已有属性，即使为初始化时（因为有可能再次调用`onCommit`）
-   */
-  abstract onDestroy(): void;
-
-  onMount(): void {}
-  onUnmount(): void {}
-}
-
 /**
  * **视图**
  * @description
  * Element树的根节点。获取一个hmUI控件工厂，并将其传递给子树。
  * 外界访问
  */
-class RenderView extends RenderNodeWithSingleChild {
+export class RenderView extends RenderNodeWithSingleChild {
   #key: string | symbol;
 
   constructor({
@@ -1167,8 +1156,6 @@ class RenderView extends RenderNodeWithSingleChild {
       this.visitChildren((child) => child.place(this._position!));
     }
   }
-  onMount(): void {}
-  onUnmount(): void {}
 
   performLayout(): void {
     assert(this._size != null);
@@ -1184,6 +1171,59 @@ class RenderView extends RenderNodeWithSingleChild {
   }
   performResize(): void {}
   performCommit(): void {}
+}
+
+export abstract class RenderWidget extends RenderNodeWithNoChild {
+  protected _displaying = false;
+  /**
+   * **创建组件或更新布局**
+   * @description
+   * 当布局更新或者初始化时调用。不应在此方法内修改已有属性，即使为初始化时（因为有可能再次调用`onCommit`）
+   * @param layout 布局信息
+   * @param initial 是否为初始化
+   * @param widgetFactory 控件工厂（仅应在onCommit调用开始到onDestory调用期间使用，因为其他时候可能发生改变）
+   */
+  abstract onCommit({
+    size,
+    position,
+    widgetFactory,
+    initial,
+  }: {
+    size: Size;
+    position: Coordinate;
+    widgetFactory: WidgetFactory;
+    initial?: boolean;
+  }): void;
+  /**
+   * **删除组件**
+   * @description
+   * 当控件被移出可渲染树时调用。不应在此方法内修改已有属性，即使为初始化时（因为有可能再次调用`onCommit`）
+   */
+  abstract onDestroy(widgetFactory: WidgetFactory): void;
+  onAttach(): void {
+    this.markMustCommit();
+  }
+  onDetach(): void {
+    this._displaying = false;
+    assert(this._widgetFactory !== null);
+    this.onDestroy(this._widgetFactory!);
+  }
+  abstract performResize(): void;
+  abstract performLayout(): void;
+  performCommit(): void {
+    assert(
+      this.size !== null &&
+        this.position !== null &&
+        this._widgetFactory !== null,
+    );
+    this.onCommit({
+      size: this.size!,
+      position: this.position!,
+      initial: !this._displaying,
+      widgetFactory: this._widgetFactory!,
+    });
+    this._displaying = true;
+  }
 }
 
 export interface WidgetFactory {
@@ -1213,12 +1253,12 @@ export class AsukaUI {
     if (!size) {
       if (mount === hmUI) {
         let { width, height } = getDeviceInfo();
-        size = { width, height };
+        size = { w: width, h: height };
       } else {
         try {
           size = {
-            width: (mount as any).getProperty(hmUI.prop.W),
-            height: (mount as any).getProperty(hmUI.prop.H),
+            w: (mount as any).getProperty(hmUI.prop.W),
+            h: (mount as any).getProperty(hmUI.prop.H),
           };
         } catch {
           reportError('createFrame', Error('Get View size failed'));
@@ -1245,16 +1285,15 @@ export class AsukaUI {
 
   createNode(type: string): AsukaNode | null {
     let element: AsukaNode | null = null;
-    for(let nodeFactory of this._nodeFactories) {
-      element = nodeFactory.createNode(type)
-      if(element) break;
+    for (let nodeFactory of this._nodeFactories) {
+      element = nodeFactory.createNode(type);
+      if (element) break;
     }
     if (element !== null && isRenderNode(element)) {
       (element as RenderNode)._core = this;
     }
     return element;
   }
-
 
   /** 需要重新布局的起始节点 */
   _nodesNeedsLayout: RenderNode[] = [];

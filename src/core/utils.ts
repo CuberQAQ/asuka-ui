@@ -1,4 +1,4 @@
-import { AsukaNode } from './AsukaDOM.bak';
+import { AsukaNode } from './base';
 
 /**
  * **向数组中插入或删除一个元素**

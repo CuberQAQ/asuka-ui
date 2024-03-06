@@ -1,11 +1,9 @@
-import { AsukaNode } from "./AsukaDOM.bak";
+import { AsukaNode } from './base';
 
 export const NodeType = {
   TEXT_NODE: 1,
   RENDER_NODE: 2,
-}
-
-
+};
 
 export function isRenderNode(node: AsukaNode | null) {
   return node === null ? false : node.nodeType === NodeType.RENDER_NODE;
@@ -14,4 +12,3 @@ export function isRenderNode(node: AsukaNode | null) {
 export function isTextNode(node: AsukaNode | null) {
   return node === null ? false : node.nodeType === NodeType.TEXT_NODE;
 }
-

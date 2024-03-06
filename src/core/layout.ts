@@ -40,7 +40,10 @@ export class Constraints {
     minWidth?: number;
     maxWidth?: number;
   }) {
-    // TODO 处理 NaN 的情况
+    if (isNaN(minHeight)) minHeight = 0;
+    if (isNaN(minWidth)) minWidth = 0;
+    if (isNaN(maxHeight)) maxHeight = 0;
+    if (isNaN(maxWidth)) maxWidth = 0;
     if (minHeight < 0) minHeight = 0;
     if (minWidth < 0) minWidth = 0;
     if (maxHeight < minHeight) maxHeight = minHeight;
@@ -59,11 +62,26 @@ export class Constraints {
    */
   static createTight(size: Size) {
     return new Constraints({
-      minWidth: size.width,
-      maxWidth: size.width,
-      minHeight: size.height,
-      maxHeight: size.height,
+      minWidth: size.w,
+      maxWidth: size.w,
+      minHeight: size.h,
+      maxHeight: size.h,
     });
+  }
+  static isValid(constraints: Constraints | null) {
+    return (
+      constraints != null &&
+      !(
+        isNaN(constraints.minHeight) ||
+        isNaN(constraints.minWidth) ||
+        isNaN(constraints.maxHeight) ||
+        isNaN(constraints.maxWidth)
+      ) &&
+      constraints.minHeight >= 0 &&
+      constraints.minWidth >= 0 &&
+      constraints.minHeight <= constraints.maxHeight &&
+      constraints.minWidth <= constraints.maxWidth
+    );
   }
   /**
    * **约束操作**
@@ -72,10 +90,10 @@ export class Constraints {
    * @param size 需要约束的Size对象
    */
   constrain(size: Size) {
-    if (size.width < this.minWidth) size.width = this.minWidth;
-    else if (size.width > this.maxWidth) size.width = this.maxWidth;
-    if (size.height < this.minHeight) size.height = this.minHeight;
-    else if (size.height > this.maxHeight) size.height = this.maxHeight;
+    if (size.w < this.minWidth) size.w = this.minWidth;
+    else if (size.w > this.maxWidth) size.w = this.maxWidth;
+    if (size.h < this.minHeight) size.h = this.minHeight;
+    else if (size.h > this.maxHeight) size.h = this.maxHeight;
   }
 
   /**
@@ -90,7 +108,15 @@ export class Constraints {
       maxWidth: this.maxWidth,
     });
   }
-
+  /**
+   * **返回符合该约束的最大尺寸**
+   */
+  maxSize(): Size {
+    return {
+      w: this.maxWidth,
+      h: this.maxHeight,
+    };
+  }
   /**
    * **是否为严格约束**
    * @description
@@ -122,16 +148,16 @@ export class Size {
   static equals(size1: Size | null, size2: Size | null): boolean {
     if (size1 == null && size2 == null) return true;
     else if (size1 == null || size2 == null) return false;
-    return size1.width === size2.width && size1.height === size2.height;
+    return size1.w === size2.w && size1.h === size2.h;
   }
   static isValid(size: Size | null) {
     // NaN>=0 -> false; 负无穷>=0 -> false; isFinite(正无穷) -> false.
     return (
       size != null &&
-      size.height >= 0 &&
-      size.width >= 0 &&
-      isFinite(size.height) &&
-      isFinite(size.width)
+      size.h >= 0 &&
+      size.w >= 0 &&
+      isFinite(size.h) &&
+      isFinite(size.w)
     );
   }
   static copy(size: Size) {
@@ -150,15 +176,15 @@ export class Size {
   static add(size1: Size, size2: Size): Size {
     assert(size1 != null && size2 != null);
     return {
-      width: size1.width + size2.width,
-      height: size1.height + size2.height,
+      w: size1.w + size2.w,
+      h: size1.h + size2.h,
     };
   }
 }
 
 export interface Size {
-  width: number;
-  height: number;
+  w: number;
+  h: number;
 }
 
 export interface Coordinate {

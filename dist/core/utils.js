@@ -6,7 +6,7 @@
  * @param ref 要删除的元素 或者 要插入元素的后面的元素
  * @param add 要插入的元素
  * @param byValueOnly 返回值为
- * @returns 操作失败时，返回`-1`；否则当
+ * @returns 操作失败时，返回`-1`；否则返回其在数组中对应的原索引
  */
 export function splice(arr, ref, add, byValueOnly) {
     let i = (arr ? findWhere(arr, ref, true, byValueOnly) : -1);
@@ -34,12 +34,6 @@ export function findWhere(arr, ref, returnIndex, byValueOnly) {
 // export function createAttributeFilter(ns: string, name: string) {
 //   return (o: any) => o.ns === ns && toLower(o.name) === toLower(name);
 // }
-export function isElement(node) {
-    return node.nodeType === 1;
-}
-export function isTextNode(node) {
-    return node.nodeType === 3;
-}
 export function parseDimension(v) {
     if (typeof v === 'string') {
         if (v.endsWith('px')) {

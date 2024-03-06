@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../src/components/native-bindings/index.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,gBAAgB,EAAE,MAAM,QAAQ,CAAC;AAE1C,MAAM,CAAC,MAAM,qBAAqB,GAAgB;IAChD,UAAU,CAAC,IAAI;QACb,QAAQ,IAAI,EAAE;YACZ,KAAK,MAAM;gBACT,OAAO,IAAI,gBAAgB,CAAC,IAAI,EAAE,MAAM,CAAC,CAAC;YAC5C;gBACE,OAAO,IAAI,CAAC;SACf;IACH,CAAC;CACF,CAAC"}
