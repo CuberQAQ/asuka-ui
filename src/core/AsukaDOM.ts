@@ -2,7 +2,8 @@
 // import { defineStyleReflection } from "./layout-bridge";
 // import { splice, findWhere, createAttributeFilter, isElement } from "./util";
 
-import { assert } from '../debug/index';
+import { getDeviceInfo } from '@zos/device';
+import { assert, reportError } from '../debug/index';
 import { objectTag } from '../decorator/debug';
 import { Constraints, Coordinate, Size } from './AsukaLayout';
 import { NodeType, isRenderNode } from './constants';
@@ -201,7 +202,7 @@ export abstract class RenderNode extends AsukaNode {
    */
   abstract onUnmount(): void;
   /**
-   * **当元素所在树由孤立变为可渲染(即渲染树不与AsukaPage连接)**
+   * **当元素所在树由孤立变为可渲染(即渲染树不与AsukaUI连接)**
    * @description
    * 该方法会通过`visitChildren`遍历所有的子`RenderNode`，并调用它们的`attach`方法、更新节点深度.
    *
@@ -211,11 +212,11 @@ export abstract class RenderNode extends AsukaNode {
    * - 当`_attached`为`false`时，也就是该节点未连接到一个可以允许子节点绘制的根节点上（也就是处于“孤立状态”），
    * 在此期间，若该节点的布局因为某些原因（比如回调事件或者布局相关的属性的变化）需要更新布局，由于处于孤立状态，本节点无法进行布局，
    * 更新布局的需求产生了对`markNeedsLayout`的调用，使`_needsLayout`为`true`，若该子节点的`_relayoutBoundary`不为`null`，
-   * 则会一直调用`markParentNeedsLayout`直到到达重布局节点，但由于`_attached`为`false`，该节点无法向`AsukaPage`发出重布局请求。
+   * 则会一直调用`markParentNeedsLayout`直到到达重布局节点，但由于`_attached`为`false`，该节点无法向`AsukaUI`发出重布局请求。
    * 倘若该重布局节点并不是此孤立树的根节点，重新挂载后，由于`mountChild`仅调用挂载父节点的`markNeedsLayout`，
    * 而该重布局节点上方的节点不一定有重布局的需要(可能在其`layout`过程中因为`_needsLayout`为`false`且新传递的约束与之前相同而直接剪枝优化，
    * 而不向下传递`layout`调用)，因此可能导致该节点`_needsLayout`为`true`，却无法得到重新布局。
-   * 所以当这种子节点被重新`attach`时，需要使其向`AsukaPage`发送布局请求。
+   * 所以当这种子节点被重新`attach`时，需要使其向`AsukaUI`发送布局请求。
    * - 当`_attached`为`false`时，由于某种原因产生对`markNeedsPlace`的调用类似. 不过`markNeedsPlace`不向上传递脏标记，因此思路较为简单
    */
   attach(): void {
@@ -240,26 +241,27 @@ export abstract class RenderNode extends AsukaNode {
       return true;
     });
     if (this._needsLayout && this._relayoutBoundary !== null) {
-      // 重新布局脏标记，使其向`AsukaPage`发出布局请求
+      // 重新布局脏标记，使其向`AsukaUI`发出布局请求
       this._needsLayout = false;
       this.markNeedsLayout();
     }
     if (this._needsPlace) {
-      // 重新放置脏标记，使其向`AsukaPage`发出放置请求
+      // 重新放置脏标记，使其向`AsukaUI`发出放置请求
       this._needsPlace = false;
       this.markNeedsPlace();
     }
+    this.markMustCommit();
     this.visitChildren((child) => child.attach());
   }
 
   /**
-   * **当元素所在树由可渲染变为孤立(即渲染树与AsukaPage连接)**
+   * **当元素所在树由可渲染变为孤立(即渲染树与AsukaUI连接)**
    * @description
-   * 子类应当按照自己的子模型重载本方法，**并在重载方法中调用`super.detach()`**
    */
   detach(): void {
     assert(this._attached);
     this._attached = false;
+    this.visitChildren((child) => child.attach());
     // 注：没必要判断了。因为_core._layout可以判断你有没有_attached。就算你被移动改变了深度，排序也是_layout里面排的
     // // 如果该节点可能注册了重布局节点
     // if(this._relayoutBoundary === this && this._needsLayout) {
@@ -392,15 +394,13 @@ export abstract class RenderNode extends AsukaNode {
   /**
    * **本节点的深度**
    *
-   * 定义`AsukaPage`的深度为`0`.
+   * 定义`AsukaUI`的深度为`0`.
    *
    * 仅当`_attached`为`true`，即不为孤立节点时有效
    *
-   * 主要用于在`AsukaPage`执行`layout`和`place`操作时确定先后顺序（深度小的节点先，深度大的节点后），保证不重复计算并正确.
+   * 主要用于在`AsukaUI`执行`layout`和`place`操作时确定先后顺序（深度小的节点先，深度大的节点后），保证不重复计算并正确.
    *
    * 在`attach`时更新
-   * @todo 考虑在两次`AsukaPage#requestRelayout`或者`AsukaPage#requestPlace`直接取消挂载并再次挂载节点，
-   * 使其深度发生改变，如果保证这种情况的布局结果正确？
    */
   _depth: number = 0;
 
@@ -585,9 +585,9 @@ export abstract class RenderNode extends AsukaNode {
   /**
    * **渲染就绪状态**
    *
-   * 即子节点是否被挂载在可渲染的树上（即根节点是否连接了AsukaPage）
+   * 即子节点是否被挂载在可渲染的树上（即根节点是否连接了AsukaUI）
    *
-   * 仅当该属性为`true`时，才注册重新布局请求(即调用 `AsukaPage#addRelayoutNode` 或 `AsukaPage#requestRelayout` 方法)
+   * 仅当该属性为`true`时，才注册重新布局请求(即调用 `AsukaUI#addRelayoutNode` 或 `AsukaUI#requestRelayout` 方法)
    */
   _attached: boolean = false;
 
@@ -596,12 +596,12 @@ export abstract class RenderNode extends AsukaNode {
    * @description
    * 提供处理布局、放置请求，处理基本默认事件，管理活动视图等核心任务。
    *
-   * 仅当`this._attach`为`true`时，才允许调用其`AsukaPage#addRelayoutNode` 或 `AsukaPage#requestRelayout` 等方法
+   * 仅当`this._attach`为`true`时，才允许调用其`AsukaUI#addRelayoutNode` 或 `AsukaUI#requestRelayout` 等方法
    *
-   * 目前由AsukaPage创建节点时设置，不应自行修改)
+   * 目前由AsukaUI创建节点时设置，不应自行修改)
    *
    */
-  _core: AsukaPage | null = null;
+  _core: AsukaUI | null = null;
 
   /**
    * **布局尺寸仅由父节点传递的约束决定**
@@ -735,13 +735,17 @@ export abstract class RenderNode extends AsukaNode {
   place(parentNewPosition?: Coordinate) {
     // TODO 根节点的特殊处理
 
-    assert(this.parentNode !== null);
+    assert(isRenderNode(this.parentNode));
+    let parentNode = this.parentNode as RenderNode;
     assert(this._offset != null);
+    assert(parentNode._position != null);
     if (!this._needsPlace && !parentNewPosition) return;
     this._needsPlace = false;
     let position = parentNewPosition
       ? Coordinate.add(parentNewPosition, this.offset!)
-      : Coordinate.copy(this.offset!);
+      : parentNode.isNewCoordOrigin
+        ? Coordinate.copy(this.offset!)
+        : Coordinate.add(this.offset!, parentNode._position!);
     // TODO copy和equals操作和setter重复了，是否可优化？
     let positionChanged = !Coordinate.equals(position, this._position);
     // TODO 检查并调试代码
@@ -753,7 +757,7 @@ export abstract class RenderNode extends AsukaNode {
       this.performCommit();
     }
     if (positionChanged && !this.isNewCoordOrigin) {
-      this.visitChildren((child) => this.place(position));
+      this.visitChildren((child) => child.place(position));
     }
   }
 
@@ -766,7 +770,7 @@ export abstract class RenderNode extends AsukaNode {
     if (this._relayoutBoundary === null) {
       this._needsLayout = true;
       // TODO 自加测试
-      assert(this.parentNode !== null);
+      // assert(this.parentNode !== null);
       // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
       // Conservatively mark everything dirty until it reaches the closest
       // known relayout boundary.
@@ -868,6 +872,125 @@ export abstract class RenderNode extends AsukaNode {
   /**------------------DEBUG------------------- */
 }
 
+export abstract class RenderNodeWithNoChild extends RenderNode {
+  get firstChild(): AsukaNode | null {
+    return null;
+  }
+  visitChildren(handler: (child: RenderNode) => void): void {
+    return;
+  }
+  unmountChild(child: AsukaNode): boolean {
+    return false;
+  }
+  mountChild(child: AsukaNode, ref?: AsukaNode | undefined): boolean {
+    return false;
+  }
+  getChildNextSibling(child: AsukaNode): AsukaNode | null {
+    return null;
+  }
+}
+
+export abstract class RenderNodeWithSingleChild extends RenderNode {
+  _child: AsukaNode | null = null;
+  set child(child: AsukaNode | null) {
+    if (this._child) {
+      this.unmountChild(this._child);
+      this._child = null;
+    }
+    if (child != null) this.mountChild(child);
+  }
+  get child() {
+    return this._child;
+  }
+  get firstChild(): AsukaNode | null {
+    return this._child;
+  }
+  visitChildren(handler: (child: RenderNode) => void): void {
+    if (isRenderNode(this._child)) {
+      handler(this._child! as RenderNode);
+    }
+  }
+  unmountChild(child: AsukaNode): boolean {
+    if (this._child !== null && child === this._child) {
+      this._setupUnmountingChild(child);
+      this._child = null;
+      return true;
+    }
+    return false;
+  }
+  mountChild(child: AsukaNode): boolean {
+    if (this._child !== null) return false;
+    this._child = child;
+    this._setupMountingChild(child);
+    return true;
+  }
+  getChildNextSibling(child: AsukaNode): AsukaNode | null {
+    return null;
+  }
+}
+
+/**
+ * **可包含多个子节点的RenderNode**
+ *
+ * 通过双向链表存储子结构
+ */
+export abstract class RenderNodeWithMultiChildren extends RenderNode {
+  _firstChild: AsukaNode | null = null;
+  _lastChild: AsukaNode | null = null;
+
+  get firstChild(): AsukaNode | null {
+    return this._firstChild;
+  }
+  visitChildren(handler: (child: RenderNode) => void): void {
+    let nowChild = this._firstChild;
+    while (nowChild) {
+      if (isRenderNode(nowChild)) handler(nowChild as RenderNode);
+      assert(nowChild.parentData.nextSibling !== undefined); // 为null或者AsukaNode
+      nowChild = nowChild.parentData.nextSibling;
+    }
+  }
+  unmountChild(child: AsukaNode): boolean {
+    if (child.parentNode !== this) return false;
+
+    let previousSibling = child.parentData.previousSibling as AsukaNode | null;
+    let nextSibling = child.parentData.nextSibling as AsukaNode | null;
+    if (previousSibling) previousSibling.parentData.nextSibling = nextSibling;
+    if (nextSibling) nextSibling.parentData.previousSibling = previousSibling;
+    if (child === this._firstChild) {
+      this._firstChild = child.parentData.nextSibling;
+    }
+    if (child === this._lastChild) {
+      this._lastChild = child.parentData.previousSibling;
+    }
+    this._setupUnmountingChild(child);
+    return true;
+  }
+  mountChild(child: AsukaNode, ref?: AsukaNode | undefined): boolean {
+    assert(!child.parentNode);
+    if (ref) {
+      if (ref.parentNode !== this) return false;
+      this._setupMountingChild(child);
+      let previousSibling = ref.parentData.previousSibling as AsukaNode | null;
+      child.parentData.previousSibling = previousSibling;
+      ref.parentData.previousSibling = child;
+      if (previousSibling) previousSibling.parentData.nextSibling = child;
+      if (ref === this._firstChild) this._firstChild = child;
+      return true;
+    } else {
+      this._setupMountingChild(child);
+      let lastChild = this._lastChild;
+      this._lastChild = child;
+      child.parentData.previousSibling = lastChild;
+      if (lastChild) lastChild.parentData.nextSibling = child;
+      else this._firstChild = child;
+      return true;
+    }
+  }
+  getChildNextSibling(child: AsukaNode): AsukaNode | null {
+    return child.parentData.nextSibling;
+  }
+}
+
 /**
  * **事件类**
  * @description
@@ -962,67 +1085,105 @@ export abstract class RenderNative extends RenderNode {
  * Element树的根节点。获取一个hmUI控件工厂，并将其传递给子树。
  * 外界访问
  */
-class RenderView extends RenderNode {
-  constructor() {
+class RenderView extends RenderNodeWithSingleChild {
+  #key: string | symbol;
+
+  constructor({
+    core,
+    widgetFactory,
+    size,
+    key,
+    offset = { x: 0, y: 0 },
+  }: {
+    core: AsukaUI;
+    widgetFactory: WidgetFactory;
+    size: Size;
+    key: string | symbol;
+    offset: Coordinate;
+  }) {
     super(NodeType.RENDER_NODE, '#frame');
+    this._widgetFactory = widgetFactory;
+    this._depth = 1;
+    this._size = Size.copy(size);
+    this._offset = Coordinate.copy(offset);
+    this._position = Coordinate.copy(offset);
+    this._core = core;
+    this.#key = key;
+    this._attached = true;
+    this._relayoutBoundary = this;
+    // this.isNewCoordOrigin = true;
   }
-
-  protected _rootNode: RenderNode | null = null;
+  get key() {
+    return this.#key;
+  }
   /**
-   * **设置`rootNode`，并调用detach和attach**
+   * @override
    */
-  // set rootNode(node: RenderNode | null) {
-  //   if(this._rootNode === node) return;
-  //   this._rootNode?.detach();
-  //   this._rootNode = node
-  //   this._rootNode?.attach();
-  // }
-  // get rootNode() {
-  //   return this._rootNode;
-  // }
-
+  set size(size: Size | null) {
+    assert(Size.isValid(size));
+    if (size == null) return;
+    if (!Size.equals(size, this._size)) {
+      this._size = Size.copy(size!);
+      this.markNeedsLayout();
+    }
+  }
+  setSize(size: Size) {
+    this.size = size;
+    return this;
+  }
+  set offset(offset: Coordinate | null) {
+    assert(Coordinate.isValid(offset));
+    if (offset == null) return;
+    if (!Coordinate.equals(this._offset, offset)) {
+      this._offset = Coordinate.copy(offset!);
+      this._position = Coordinate.copy(offset!);
+      this.markNeedsPlace();
+    }
+  }
+  setOffset(offset: Coordinate) {
+    this.offset = offset;
+    return this;
+  }
+  set position(position: Coordinate | null) {
+    assert(Coordinate.isValid(position));
+    if (position == null) return;
+    if (!Coordinate.equals(this._position, position)) {
+      this._offset = Coordinate.copy(position!);
+      this._position = Coordinate.copy(position!);
+      this.markNeedsPlace();
+    }
+  }
+  setPosition(position: Coordinate) {
+    this.position = position;
+    return this;
+  }
+  place() {
+    assert(this._offset != null);
+    assert(this._position != null);
+    if (!this._needsPlace) return;
+    this._needsPlace = false;
+    // }
+    if (!this.isNewCoordOrigin) {
+      this.visitChildren((child) => child.place(this._position!));
+    }
+  }
   onMount(): void {}
   onUnmount(): void {}
 
-  /**
-   * // TODO
-   * 删除该View及整棵子树
-   */
-  destroy(): void {}
-
-  getChildNextSibling(child: AsukaNode): AsukaNode | null {
-    return null;
-  }
-  get firstChild(): AsukaNode | null {
-    return this._rootNode;
-  }
-  unmountChild(child: AsukaNode): boolean {
-    if (child === this._rootNode) {
-      this._setupUnmountingChild(child);
-      this._rootNode?.detach();
-      this._rootNode = null; // 同时detach子树
-      return true;
+  performLayout(): void {
+    assert(this._size != null);
+    assert(this._widgetFactory != null);
+    if (isRenderNode(this.child)) {
+      let child = this.child as RenderNode;
+      child.layout(Constraints.createTight(this._size!), {
+        parentUsesSize: false,
+        widgetFactory: this._widgetFactory!,
+      });
+      child.offset = Coordinate.origin();
     }
-    return false;
   }
-  mountChild(child: AsukaNode, ref?: AsukaNode | undefined): boolean {
-    assert(this._rootNode === null);
-    assert(ref === null);
-    assert(isRenderNode(child));
-    if (this._rootNode !== null) this._rootNode.detach();
-    this._rootNode = child as RenderNode;
-    this._rootNode.attach();
-    return true;
-  }
-  performLayout(): void {}
   performResize(): void {}
   performCommit(): void {}
-  visitChildren(handler: (child: RenderNode) => void): void {
-    assert(this._rootNode !== null);
-    if (this._rootNode !== null) handler(this._rootNode!);
-  }
-  setSize(size: Size) {}
-  setOffset(offset: Coordinate) {}
 }
 
 export interface WidgetFactory {
@@ -1030,9 +1191,14 @@ export interface WidgetFactory {
   deleteWidget(widget: any): void;
 }
 
-export class AsukaPage {
-  public frameList: RenderView[] = [];
+export interface NodeFactory {
+  createNode(type: string): AsukaNode | null;
+}
+
+export class AsukaUI {
+  public viewRecord: Record<string | symbol, RenderView | null> = {};
   protected _activeFrame: RenderView | null = null;
+  protected _nodeFactories: NodeFactory[] = [];
   get activeFrame() {
     return this._activeFrame;
   }
@@ -1040,23 +1206,55 @@ export class AsukaPage {
     // TODO
     this._activeFrame = frame;
   }
-  createFrame(
+  mountView(
     mount: WidgetFactory = hmUI,
-    { size, offset }: { size?: Size; offset?: Coordinate },
+    { size, offset = { x: 0, y: 0 } }: { size?: Size; offset?: Coordinate },
   ): RenderView {
-    let frame = new RenderView();
-    return frame;
-  }
-  deleteFrame(frame: RenderView) {}
-
-  createElement(type: string) {
-    let element: RenderNode | null = null;
-    switch (type) {
+    if (!size) {
+      if (mount === hmUI) {
+        let { width, height } = getDeviceInfo();
+        size = { width, height };
+      } else {
+        try {
+          size = {
+            width: (mount as any).getProperty(hmUI.prop.W),
+            height: (mount as any).getProperty(hmUI.prop.H),
+          };
+        } catch {
+          reportError('createFrame', Error('Get View size failed'));
+        }
+      }
     }
-    if (element !== null) {
+    if (!size) throw Error('Get View size failed');
+    let view = new RenderView({
+      widgetFactory: mount,
+      core: this,
+      size,
+      key: Symbol('Asuka View'),
+      offset,
+    });
+    this.viewRecord[view.key] = view;
+    return view;
+  }
+  unmountView(view: RenderView): boolean {
+    if (!view._attached || !this.viewRecord[view.key]) return false;
+    view.detach();
+    this.viewRecord[view.key] = null;
+    return true;
+  }
+
+  createNode(type: string): AsukaNode | null {
+    let element: AsukaNode | null = null;
+    for(let nodeFactory of this._nodeFactories) {
+      element = nodeFactory.createNode(type)
+      if(element) break;
+    }
+    if (element !== null && isRenderNode(element)) {
       (element as RenderNode)._core = this;
     }
+    return element;
   }
+
 
   /** 需要重新布局的起始节点 */
   _nodesNeedsLayout: RenderNode[] = [];

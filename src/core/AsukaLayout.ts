@@ -50,7 +50,21 @@ export class Constraints {
     this.minWidth = minWidth;
     this.maxWidth = maxWidth;
   }
-
+  /**
+   * **创建一个严格约束**
+   * @description 给定一个`Size`对象，返回一个`Constraints`对象，
+   * 使得满足该`Constraints`约束的`Size`仅有给定的`Size`一种
+   * @param size
+   * @returns
+   */
+  static createTight(size: Size) {
+    return new Constraints({
+      minWidth: size.width,
+      maxWidth: size.width,
+      minHeight: size.height,
+      maxHeight: size.height,
+    });
+  }
   /**
    * **约束操作**
    * @description
@@ -160,6 +174,9 @@ export class Coordinate {
   static isValid(coord: Coordinate | null) {
     // isFinite(NaN) -> false
     return coord != null && isFinite(coord.x) && isFinite(coord.y);
+  }
+  static origin(): Coordinate {
+    return { x: 0, y: 0 };
   }
   static equals(coord1: Coordinate | null, coord2: Coordinate | null) {
     if (coord1 == null && coord2 == null) return true;

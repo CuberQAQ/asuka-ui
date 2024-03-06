@@ -15,6 +15,3 @@ export function isTextNode(node: AsukaNode | null) {
   return node === null ? false : node.nodeType === NodeType.TEXT_NODE;
 }
 
-
-
-function build() {}
