@@ -22,6 +22,10 @@ export class NativeWidgetText extends RenderWidget {
             assert(this._widget === null);
             this._widget = widgetFactory.createWidget(hmUI.widget.TEXT, Object.assign(Object.assign(Object.assign({}, this._props), position), size));
         }
+        else {
+            assert(this._widget != null);
+            this._widget.setProperty(hmUI.prop.MORE, Object.assign(Object.assign(Object.assign({}, this._props), position), size));
+        }
     }
     onDestroy(widgetFactory) {
         assert(widgetFactory !== null && this._widget !== null);

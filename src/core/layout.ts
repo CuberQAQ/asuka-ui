@@ -4,7 +4,8 @@
 //   minWidth: number;
 //   maxWidth: number;
 
-import { assert } from "../debug/index.js";
+import { assert } from '../debug/index.js';
+import { max, min } from '../tools/math.js';
 
 // }
 /**
@@ -98,7 +99,34 @@ export class Constraints {
     else if (size.h > this.maxHeight) size.h = this.maxHeight;
     return size;
   }
+  /**
+   * **适应操作**
+   * @description
+   * 将该Constraints通过最小改动符合给定的Constraints
+   *
+   * **将直接修改源对象**
+   * @param size 需要约束的Size对象
+   */
+  adoptBy(constrain: Constraints) {
+    assert(Constraints.isValid(constrain));
+    if (this.minWidth < constrain.minWidth) this.minWidth = constrain.minWidth;
+    else if (this.minWidth > constrain.maxWidth)
+      this.minWidth = constrain.maxWidth;
 
+    if (this.maxWidth > constrain.maxWidth)
+      this.maxWidth = constrain.maxWidth;
+    else if (this.maxWidth < constrain.minWidth)
+      this.maxWidth = constrain.minWidth;
+
+    if (this.minHeight < constrain.minHeight) this.minHeight = constrain.minHeight;
+    else if (this.minHeight > constrain.maxHeight)
+      this.minHeight = constrain.maxHeight;
+    if (this.maxHeight > constrain.maxHeight)
+      this.maxHeight = constrain.maxHeight;
+    else if (this.maxHeight < constrain.minHeight)
+      this.maxHeight = constrain.minHeight;
+    return this;
+  }
   /**
    * **宽松化**
    * @description
@@ -191,6 +219,22 @@ export class Size {
       h: size1.h + size2.h,
     };
   }
+  /**
+   * **分别相减两个`Size`对象的长和宽，并返回一个新对象.**
+   *
+   * 注意
+   * - 传递空值会报错，但没判断是否合法.
+   * @param size1
+   * @param size2
+   * @returns 累加后的新对象
+   */
+  static remove(size1: Size, size2: Size): Size {
+    assert(size1 != null && size2 != null);
+    return {
+      w: size1.w - size2.w,
+      h: size1.h - size2.h,
+    };
+  }
 }
 
 export interface Size {
@@ -235,5 +279,77 @@ export class Coordinate {
       x: coord1.x + coord2.x,
       y: coord1.y + coord2.y,
     };
+  }
+}
+
+export class Alignment {
+  _x: number = 0;
+  _y: number = 0;
+  /**
+   * **创建对齐**
+   * @param x [-1.0,1.0] 当-1为最左 0为中 1为最右
+   * @param y [-1.0,1.0] 当-1为最上 0为中 1为最下
+   */
+  constructor(x?: number | null, y?: number | null) {
+    if (x) {
+      this._x = min(max(x!, -1.0), 1.0);
+    }
+    if (y) {
+      this._y = min(max(y!, -1.0), 1.0);
+    }
+  }
+  /**
+   * **创建对齐**
+   * @param x [-1.0,1.0] 当-1为最左 0为中 1为最右
+   * @param y [-1.0,1.0] 当-1为最上 0为中 1为最下
+   */
+  static create(x?: number | null, y?: number | null) {
+    return new Alignment(x, y)
+  }
+  static get topLeft() {
+    return new Alignment(-1.0, -1.0);
+  }
+  static get top() {
+    return new Alignment(0.0, -1.0);
+  }
+  static get topRight() {
+    return new Alignment(1.0, -1.0);
+  }
+  static get centerLeft() {
+    return new Alignment(-1.0, 0.0);
+  }
+  static get center() {
+    return new Alignment(0.0, 0.0);
+  }
+  static get centerRight() {
+    return new Alignment(1.0, 0.0);
+  }
+  static get bottomLeft() {
+    return new Alignment(-1.0, 1.0);
+  }
+  static get bottom() {
+    return new Alignment(0.0, 1.0);
+  }
+  static get bottomRight() {
+    return new Alignment(1.0, 1.0);
+  }
+  /**
+   * **计算子偏移量**
+   *
+   * 根据两个尺寸（一个父一个子），计算子满足该`Alignment`对象时相对父的坐标坐标
+   * @param parentSize 父尺寸
+   * @param childSize 子尺寸
+   * @returns 子相对父的偏移坐标
+   * @todo 加上子大于父的判断
+   */
+  calcOffset(parentSize: Size, childSize: Size): Coordinate {
+    let emptySize = Size.remove(parentSize, childSize);
+    return {
+      x: (emptySize.w / 2) * (1.0 + this._x),
+      y: (emptySize.h / 2) * (1.0 + this._y),
+    };
+  }
+  static copy(alignment: Alignment) {
+    return new Alignment(alignment._x, alignment._y);
   }
 }

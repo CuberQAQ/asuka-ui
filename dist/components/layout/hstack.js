@@ -13,21 +13,21 @@ export class LayoutWidgetHStack extends RenderNodeWithMultiChildren {
     performLayout() {
         assert(this.size != null);
         assert(this._widgetFactory != null);
-        let leftedHeight = this.size.h;
+        let leftedWidth = this.size.w;
         this.visitChildren((child) => {
             child.layout(new Constraints({
-                maxWidth: this.size.w,
-                maxHeight: leftedHeight,
+                maxWidth: leftedWidth,
+                maxHeight: this.size.h,
             }), { parentUsesSize: true, widgetFactory: this._widgetFactory });
             assert(child.size != null);
-            leftedHeight -= child.size.h;
+            leftedWidth -= child.size.w;
         });
         // offset
-        let offsetY = 0;
+        let offsetX = 0;
         this.visitChildren(child => {
-            let offsetX = (this.size.w - child.size.w) / 2; // 水平方向居中
+            let offsetY = (this.size.h - child.size.h) / 2; // 垂直方向居中
             child.offset = { x: offsetX, y: offsetY };
-            offsetY += child.size.h;
+            offsetX += child.size.w;
         });
     }
     performCommit() { }

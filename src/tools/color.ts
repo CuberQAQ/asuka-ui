@@ -1,9 +1,5 @@
-function min(a: number, b: number) {
-  return a <= b ? a : b;
-}
-function max(a: number, b: number) {
-  return a >= b ? a : b;
-}
+import { max, min } from "./math";
+
 
 export function rgb(r: number, g: number, b: number) {
   r = ~~max(min(r, 255), 0);

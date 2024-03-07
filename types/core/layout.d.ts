@@ -45,6 +45,15 @@ export declare class Constraints {
      */
     constrain(size: Size): Size;
     /**
+     * **适应操作**
+     * @description
+     * 将该Constraints通过最小改动符合给定的Constraints
+     *
+     * **将直接修改源对象**
+     * @param size 需要约束的Size对象
+     */
+    adoptBy(constrain: Constraints): this;
+    /**
      * **宽松化**
      * @description
      * 将`minHeight`和`minWidth`的限制去除（设为0），返回一个新Constrains对象，不会改变原Constrains对象
@@ -88,6 +97,16 @@ export declare class Size {
      * @returns 累加后的新对象
      */
     static add(size1: Size, size2: Size): Size;
+    /**
+     * **分别相减两个`Size`对象的长和宽，并返回一个新对象.**
+     *
+     * 注意
+     * - 传递空值会报错，但没判断是否合法.
+     * @param size1
+     * @param size2
+     * @returns 累加后的新对象
+     */
+    static remove(size1: Size, size2: Size): Size;
 }
 export interface Size {
     w: number;
@@ -115,5 +134,41 @@ export declare class Coordinate {
      * @returns 累加后的新对象
      */
     static add(coord1: Coordinate, coord2: Coordinate): Coordinate;
+}
+export declare class Alignment {
+    _x: number;
+    _y: number;
+    /**
+     * **创建对齐**
+     * @param x [-1.0,1.0] 当-1为最左 0为中 1为最右
+     * @param y [-1.0,1.0] 当-1为最上 0为中 1为最下
+     */
+    constructor(x?: number | null, y?: number | null);
+    /**
+     * **创建对齐**
+     * @param x [-1.0,1.0] 当-1为最左 0为中 1为最右
+     * @param y [-1.0,1.0] 当-1为最上 0为中 1为最下
+     */
+    static create(x?: number | null, y?: number | null): Alignment;
+    static get topLeft(): Alignment;
+    static get top(): Alignment;
+    static get topRight(): Alignment;
+    static get centerLeft(): Alignment;
+    static get center(): Alignment;
+    static get centerRight(): Alignment;
+    static get bottomLeft(): Alignment;
+    static get bottom(): Alignment;
+    static get bottomRight(): Alignment;
+    /**
+     * **计算子偏移量**
+     *
+     * 根据两个尺寸（一个父一个子），计算子满足该`Alignment`对象时相对父的坐标坐标
+     * @param parentSize 父尺寸
+     * @param childSize 子尺寸
+     * @returns 子相对父的偏移坐标
+     * @todo 加上子大于父的判断
+     */
+    calcOffset(parentSize: Size, childSize: Size): Coordinate;
+    static copy(alignment: Alignment): Alignment;
 }
 //# sourceMappingURL=layout.d.ts.map

@@ -5,8 +5,8 @@ export const NativeBindingsFactory = {
         switch (type) {
             case 'text':
                 return new NativeWidgetText(null, 'text');
-            case 'fillRect':
-                return new NativeWidgetFillRect(null, 'fillRect');
+            case 'fill-rect':
+                return new NativeWidgetFillRect(null, 'fill-rect');
             default:
                 return null;
         }

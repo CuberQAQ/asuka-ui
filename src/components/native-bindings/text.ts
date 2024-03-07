@@ -35,6 +35,14 @@ export class NativeWidgetText extends RenderWidget {
         ...size,
       });
     }
+    else {
+      assert(this._widget != null);
+      this._widget!.setProperty(hmUI.prop.MORE, {
+        ...this._props,
+        ...position,
+        ...size,
+      });
+    }
   }
   onDestroy(widgetFactory: WidgetFactory): void {
     assert(widgetFactory !== null && this._widget !== null);
