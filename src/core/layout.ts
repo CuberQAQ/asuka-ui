@@ -87,6 +87,8 @@ export class Constraints {
    * **约束操作**
    * @description
    * 将给定的Size对象以最小改动约束至该Constraints
+   *
+   * **将直接修改源对象**
    * @param size 需要约束的Size对象
    */
   constrain(size: Size) {
@@ -94,6 +96,7 @@ export class Constraints {
     else if (size.w > this.maxWidth) size.w = this.maxWidth;
     if (size.h < this.minHeight) size.h = this.minHeight;
     else if (size.h > this.maxHeight) size.h = this.maxHeight;
+    return size;
   }
 
   /**
@@ -141,6 +144,14 @@ export class Constraints {
       other.minWidth === this.minWidth &&
       other.maxWidth === this.maxWidth
     );
+  }
+  toString() {
+    return JSON.stringify({
+      minWidth: this.minWidth,
+      maxWidth: this.maxWidth,
+      minHeight: this.minHeight,
+      maxHeight: this.maxHeight,
+    });
   }
 }
 

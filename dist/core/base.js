@@ -42,6 +42,13 @@ export class AsukaNode {
         /** 父节点 */
         this.parentNode = null;
     }
+    /**------------------属性设置------------------- */
+    /**
+     * **设置元素属性**
+     * @param key 属性键
+     * @param value 属性值
+     */
+    setProperty(key, value) { }
 }
 /**
  * **文字节点类**
@@ -59,6 +66,26 @@ export class AsukaTextNode extends AsukaNode {
     }
     get data() {
         return this._text;
+    }
+    get firstChild() {
+        return null;
+    }
+    getChildNextSibling(child) {
+        return null;
+    }
+    mountChild(child, ref) {
+        return false;
+    }
+    unmountChild(child) {
+        return false;
+    }
+}
+/**
+ * **未知节点类**
+ */
+export class AsukaUnknownNode extends AsukaNode {
+    constructor() {
+        super(NodeType.UNKNOWN_NODE, '#unknown'); // 3: TEXT_NODE
     }
     get firstChild() {
         return null;
@@ -241,13 +268,6 @@ export class RenderNode extends AsukaNode {
          */
         this.sizedByParent = false;
     }
-    /**------------------属性设置------------------- */
-    /**
-     * **设置元素属性**
-     * @param key 属性键
-     * @param value 属性值
-     */
-    setProperty(key, value) { }
     /**------------------事件处理------------------- */
     /**
      * **添加事件处理器**
@@ -337,7 +357,6 @@ export class RenderNode extends AsukaNode {
         this._attached = true;
         // 重新计算节点的深度
         this._depth = this.parentNode._depth + 1;
-        this.onAttach();
         // 如果该节点在孤立状态时被上了布局脏标记（如果是`null`，`markParentNeedsLayout`的调用会传递至孤立树的根节点，
         // 保证沿途每个节点都被标记为脏，并在`mountChild`后得到向下传递的重布局调用）
         assert(() => {
@@ -359,6 +378,7 @@ export class RenderNode extends AsukaNode {
             this._needsPlace = false;
             this.markNeedsPlace();
         }
+        this.onAttach(); // 不能放在前面，否则重新放置脏标记的操作可能导致重复请求放置操作
         // this.markMustCommit();
         this.visitChildren((child) => child.attach());
     }
@@ -370,7 +390,7 @@ export class RenderNode extends AsukaNode {
         assert(this._attached);
         this._attached = false;
         this.onDetach();
-        this.visitChildren((child) => child.attach());
+        this.visitChildren((child) => child.detach());
         // 注：没必要判断了。因为_core._layout可以判断你有没有_attached。就算你被移动改变了深度，排序也是_layout里面排的
         // // 如果该节点可能注册了重布局节点
         // if(this._relayoutBoundary === this && this._needsLayout) {
@@ -389,18 +409,19 @@ export class RenderNode extends AsukaNode {
      *
      * 通常被`mountChild`调用.
      *
-     * 不负责处理 attach. 请在`mountChild`时自行处理.
      * @param child 要设置的子节点
      */
     _setupMountingChild(child) {
         child.parentNode = this;
         child.parentData = {};
+        this.markNeedsLayout(); // 或许将该职责转移到`mountChild`上
         if (isRenderNode(child)) {
             // (child as RenderNode)._owner = this._owner;
+            if (this._attached)
+                child.attach(); // 在`markNeedsLayout`后调用（因为里面有断言）
             child.onMount();
             // (child as RenderNode)._cleanRelayoutBoundary();
         }
-        this.markNeedsLayout(); // 或许将该职责转移到`mountChild`上
     }
     /**
      * **设置取消挂载的子节点**
@@ -411,7 +432,6 @@ export class RenderNode extends AsukaNode {
      *
      * 通常被`unmountChild`调用.
      *
-     * 不负责处理 detach. 请在`unmountChild`自行处理
      * @param child 要设置的子节点
      */
     _setupUnmountingChild(child) {
@@ -419,6 +439,8 @@ export class RenderNode extends AsukaNode {
         child.parentData = null;
         if (isRenderNode(child)) {
             child.onUnmount();
+            if (this._attached)
+                child.detach();
             // 清除子树上即将失效(也就是指向本节点或者本节点的祖先)的`_relayoutBoundary`
             child._cleanRelayoutBoundary();
         }
@@ -437,8 +459,7 @@ export class RenderNode extends AsukaNode {
      */
     set size(size) {
         assert(Size.isValid(size));
-        if (size == null)
-            return;
+        assert(size != null);
         if (!Size.equals(size, this._size)) {
             this.markNeedsPlace();
             // assert(this._sizeChanged === false)
@@ -696,9 +717,10 @@ export class RenderNode extends AsukaNode {
         // TODO 检查代码
         if (this._needsPlace)
             return;
+        this._needsPlace = true;
         if (this._attached) {
             assert(this._core != null);
-            this._core.addRelayoutNode(this);
+            this._core.addPlaceNode(this);
             this._core.requestPlace();
         }
         // TODO attached后再处理
@@ -821,6 +843,7 @@ export class RenderNodeWithMultiChildren extends RenderNode {
             ref.parentData.previousSibling = child;
             if (previousSibling)
                 previousSibling.parentData.nextSibling = child;
+            child.parentData.nextSibling = ref;
             if (ref === this._firstChild)
                 this._firstChild = child;
             return true;
@@ -834,6 +857,7 @@ export class RenderNodeWithMultiChildren extends RenderNode {
                 lastChild.parentData.nextSibling = child;
             else
                 this._firstChild = child;
+            child.parentData.nextSibling = null;
             return true;
         }
     }
@@ -925,6 +949,9 @@ export class RenderView extends RenderNodeWithSingleChild {
             this._size = Size.copy(size);
             this.markNeedsLayout();
         }
+    }
+    get size() {
+        return this._size; // getter 和 setter要同时重载...
     }
     setSize(size) {
         this.size = size;
@@ -1030,7 +1057,9 @@ export class AsukaUI {
         // TODO
         this._activeFrame = frame;
     }
-    mountView(mount = hmUI, { size, offset = { x: 0, y: 0 } }) {
+    mountView(mount = hmUI, options) {
+        let size = options && options.size;
+        let offset = (options && options.offset) || { x: 0, y: 0 };
         if (!size) {
             if (mount === hmUI) {
                 let { width, height } = getDeviceInfo();
@@ -1067,6 +1096,9 @@ export class AsukaUI {
         this.viewRecord[view.key] = null;
         return true;
     }
+    registerNodeFactory(nodeFactory) {
+        this._nodeFactories.push(nodeFactory);
+    }
     createNode(type) {
         let element = null;
         for (let nodeFactory of this._nodeFactories) {
@@ -1078,6 +1110,9 @@ export class AsukaUI {
             element._core = this;
         }
         return element;
+    }
+    createTextNode(text) {
+        return new AsukaTextNode(text);
     }
     /**
      * **添加需要重新布局的节点**
@@ -1128,6 +1163,12 @@ export class AsukaUI {
         if (this._asyncHandler !== null)
             clearTimeout(this._asyncHandler);
     }
+    refreshSync() {
+        if (this._asyncHandler !== null) {
+            clearTimeout(this._asyncHandler);
+            this._layoutAndPlace();
+        }
+    }
     /**
      * 重新布局时调用的
      */
@@ -1145,14 +1186,16 @@ export class AsukaUI {
             if (node._needsLayout && node._attached)
                 node._layoutWithoutResize();
         }
+        this._nodesNeedsLayout = [];
     }
     _place() {
         // TODO 检查
         this._nodesNeedsPlace.sort((node1, node2) => node1._depth - node2._depth);
-        for (let node of this._nodesNeedsLayout) {
+        for (let node of this._nodesNeedsPlace) {
             if (node._needsPlace && node._attached)
                 node.place();
         }
+        this._nodesNeedsPlace = [];
     }
 }
 //# sourceMappingURL=base.js.map

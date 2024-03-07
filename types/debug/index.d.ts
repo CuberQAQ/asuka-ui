@@ -5,5 +5,5 @@
  * @param success
  */
 export declare function assert(success: boolean | (() => boolean)): void;
-export declare function reportError(extra: string, err: Error): void;
+export declare function reportError(extra: string, err: Error | string | unknown): void;
 //# sourceMappingURL=index.d.ts.map

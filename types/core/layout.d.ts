@@ -39,9 +39,11 @@ export declare class Constraints {
      * **约束操作**
      * @description
      * 将给定的Size对象以最小改动约束至该Constraints
+     *
+     * **将直接修改源对象**
      * @param size 需要约束的Size对象
      */
-    constrain(size: Size): void;
+    constrain(size: Size): Size;
     /**
      * **宽松化**
      * @description
@@ -67,6 +69,7 @@ export declare class Constraints {
      * @returns 两个Constraints是否相等（当other参数为null时始终返回false）
      */
     equals(other: Constraints | null): boolean;
+    toString(): string;
 }
 export declare class Size {
     static equals(size1: Size | null, size2: Size | null): boolean;

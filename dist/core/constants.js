@@ -1,6 +1,7 @@
 export const NodeType = {
     TEXT_NODE: 1,
     RENDER_NODE: 2,
+    UNKNOWN_NODE: 4,
 };
 export function isRenderNode(node) {
     return node === null ? false : node.nodeType === NodeType.RENDER_NODE;

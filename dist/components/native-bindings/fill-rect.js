@@ -5,7 +5,7 @@ import { assert } from '../../debug/index';
 const defaultProps = {
     color: 0xcc0000,
 };
-export class NativeWidgetText extends RenderWidget {
+export class NativeWidgetFillRect extends RenderWidget {
     constructor() {
         super(...arguments);
         this._widget = null;
@@ -15,7 +15,7 @@ export class NativeWidgetText extends RenderWidget {
     onCommit({ size, position, widgetFactory, initial, }) {
         if (initial) {
             assert(this._widget === null);
-            this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, Object.assign(Object.assign(Object.assign({}, hmUI.prop), position), size));
+            this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, Object.assign(Object.assign(Object.assign({}, this._props), position), size));
         }
     }
     onDestroy(widgetFactory) {
@@ -26,6 +26,8 @@ export class NativeWidgetText extends RenderWidget {
         assert(Constraints.isValid(this._constraints));
         this.size = this._constraints.maxSize();
     }
-    performLayout() { }
+    performLayout() {
+        // assert(()=>{throw Error("Test Point 2")})
+    }
 }
 //# sourceMappingURL=fill-rect.js.map

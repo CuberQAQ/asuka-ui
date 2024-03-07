@@ -48,12 +48,19 @@ export declare abstract class AsukaNode {
      * @param ref 要插入的子节点后面的子节点
      * @returns 是否成功
      */
-    abstract mountChild(child: AsukaNode, ref?: AsukaNode): boolean;
+    abstract mountChild(child: AsukaNode, ref?: AsukaNode | null): boolean;
     constructor(
     /** 节点类型 */
     nodeType: number, 
     /** 节点名称 */
     nodeName: string);
+    /**------------------属性设置------------------- */
+    /**
+     * **设置元素属性**
+     * @param key 属性键
+     * @param value 属性值
+     */
+    setProperty(key: string, value: any): void;
 }
 /**
  * **文字节点类**
@@ -68,7 +75,17 @@ export declare class AsukaTextNode extends AsukaNode {
     get data(): string;
     get firstChild(): AsukaNode | null;
     getChildNextSibling(child: AsukaNode): AsukaNode | null;
-    mountChild(child: AsukaNode, ref?: AsukaNode | undefined): boolean;
+    mountChild(child: AsukaNode, ref?: AsukaNode | null): boolean;
+    unmountChild(child: AsukaNode): boolean;
+}
+/**
+ * **未知节点类**
+ */
+export declare class AsukaUnknownNode extends AsukaNode {
+    constructor();
+    get firstChild(): AsukaNode | null;
+    getChildNextSibling(child: AsukaNode): AsukaNode | null;
+    mountChild(child: AsukaNode, ref?: AsukaNode | null): boolean;
     unmountChild(child: AsukaNode): boolean;
 }
 /**
@@ -81,13 +98,6 @@ export declare abstract class RenderNode extends AsukaNode {
         [key: string]: Function[];
     };
     constructor(nodeTyle: number | null, nodeName: string);
-    /**------------------属性设置------------------- */
-    /**
-     * **设置元素属性**
-     * @param key 属性键
-     * @param value 属性值
-     */
-    setProperty(key: string, value: any): void;
     /**------------------事件处理------------------- */
     /**
      * **添加事件处理器**
@@ -171,7 +181,6 @@ export declare abstract class RenderNode extends AsukaNode {
      *
      * 通常被`mountChild`调用.
      *
-     * 不负责处理 attach. 请在`mountChild`时自行处理.
      * @param child 要设置的子节点
      */
     protected _setupMountingChild(child: AsukaNode): void;
@@ -184,7 +193,6 @@ export declare abstract class RenderNode extends AsukaNode {
      *
      * 通常被`unmountChild`调用.
      *
-     * 不负责处理 detach. 请在`unmountChild`自行处理
      * @param child 要设置的子节点
      */
     protected _setupUnmountingChild(child: AsukaNode): void;
@@ -516,7 +524,7 @@ export declare abstract class RenderNodeWithNoChild extends RenderNode {
     get firstChild(): AsukaNode | null;
     visitChildren(handler: (child: RenderNode) => void): void;
     unmountChild(child: AsukaNode): boolean;
-    mountChild(child: AsukaNode, ref?: AsukaNode | undefined): boolean;
+    mountChild(child: AsukaNode, ref?: AsukaNode | null): boolean;
     getChildNextSibling(child: AsukaNode): AsukaNode | null;
 }
 export declare abstract class RenderNodeWithSingleChild extends RenderNode {
@@ -540,7 +548,7 @@ export declare abstract class RenderNodeWithMultiChildren extends RenderNode {
     get firstChild(): AsukaNode | null;
     visitChildren(handler: (child: RenderNode) => void): void;
     unmountChild(child: AsukaNode): boolean;
-    mountChild(child: AsukaNode, ref?: AsukaNode | undefined): boolean;
+    mountChild(child: AsukaNode, ref?: AsukaNode | null): boolean;
     getChildNextSibling(child: AsukaNode): AsukaNode | null;
 }
 /**
@@ -612,6 +620,7 @@ export declare class RenderView extends RenderNodeWithSingleChild {
      * @override
      */
     set size(size: Size | null);
+    get size(): Size | null;
     setSize(size: Size): this;
     set offset(offset: Coordinate | null);
     setOffset(offset: Coordinate): this;
@@ -663,12 +672,14 @@ export declare class AsukaUI {
     protected _nodeFactories: NodeFactory[];
     get activeFrame(): RenderView | null;
     set activeFrame(frame: RenderView | null);
-    mountView(mount: WidgetFactory | undefined, { size, offset }: {
+    mountView(mount: WidgetFactory | undefined, options: {
         size?: Size;
         offset?: Coordinate;
     }): RenderView;
     unmountView(view: RenderView): boolean;
+    registerNodeFactory(nodeFactory: NodeFactory): void;
     createNode(type: string): AsukaNode | null;
+    createTextNode(text: string): AsukaTextNode;
     /** 需要重新布局的起始节点 */
     _nodesNeedsLayout: RenderNode[];
     /** 需要重新放置的节点 */
@@ -703,6 +714,7 @@ export declare class AsukaUI {
      * **取消重新布局**
      */
     cancelRelayout(): void;
+    refreshSync(): void;
     /**
      * 重新布局时调用的
      */

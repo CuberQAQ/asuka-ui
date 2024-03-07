@@ -8,7 +8,7 @@ type HmWidget = any;
 const defaultProps = {
   color: 0xcc0000,
 };
-export class NativeWidgetText extends RenderWidget {
+export class NativeWidgetFillRect extends RenderWidget {
   _widget: HmWidget | null = null;
   _props = { ...defaultProps };
   sizedByParent: boolean = true;
@@ -26,7 +26,7 @@ export class NativeWidgetText extends RenderWidget {
     if (initial) {
       assert(this._widget === null);
       this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
-        ...hmUI.prop,
+        ...this._props,
         ...position,
         ...size,
       });
@@ -40,5 +40,8 @@ export class NativeWidgetText extends RenderWidget {
     assert(Constraints.isValid(this._constraints))
     this.size = this._constraints!.maxSize()
   }
-  performLayout(): void {}
+  performLayout(): void {
+    // assert(()=>{throw Error("Test Point 2")})
+
+  }
 }

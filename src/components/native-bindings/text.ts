@@ -6,15 +6,15 @@ import { px } from '@zos/utils';
 
 type HmWidget = any;
 const defaultProps = {
-  text: 'empty text',
+  text: 'text',
   color: 0xffffff,
-  text_size: px(36),
+  text_size: Number(px(36)),
   align_h: hmUI.align.CENTER_H,
   align_v: hmUI.align.CENTER_V,
 };
 export class NativeWidgetText extends RenderWidget {
   _widget: HmWidget | null = null;
-  _props = { ...defaultProps };
+  _props: Record<string, any> = { ...defaultProps };
   sizedByParent: boolean = true;
   onCommit({
     size,
@@ -30,7 +30,7 @@ export class NativeWidgetText extends RenderWidget {
     if (initial) {
       assert(this._widget === null);
       this._widget = widgetFactory.createWidget(hmUI.widget.TEXT, {
-        ...hmUI.prop,
+        ...this._props,
         ...position,
         ...size,
       });
@@ -41,8 +41,65 @@ export class NativeWidgetText extends RenderWidget {
     widgetFactory.deleteWidget(this._widget);
   }
   performResize(): void {
-    assert(Constraints.isValid(this._constraints))
-    this.size = this._constraints!.maxSize()
+    assert(Constraints.isValid(this._constraints));
+    let { width: singleLineWidth, height: singleLineHeight } =
+      hmUI.getTextLayout(this._props.text, {
+        text_size: this._props.text_size,
+        text_width: 0,
+        wrapped: 0,
+      });
+    if (
+      this._props.text_style !== undefined &&
+      this._props.text_style === hmUI.text_style.WRAP
+    ) {
+      // 文字可换行
+      if (singleLineWidth > this._constraints!.maxWidth) {
+        // 换行
+        let { width, height } = hmUI.getTextLayout(this._props.text, {
+          text_size: this._props.text_size,
+          text_width: this._constraints!.maxWidth,
+          wrapped: 1,
+        });
+        this.size = this._constraints!.constrain({ w: width, h: height });
+      } else {
+        // 单行
+        this.size = this._constraints!.constrain({
+          w: singleLineWidth,
+          h: singleLineHeight,
+        });
+      }
+    } else {
+      // 文字不可换行
+      this.size = this._constraints!.constrain({
+        w: singleLineWidth,
+        h: singleLineHeight,
+      });
+    }
+    // this.size = this._constraints!.maxSize();
   }
   performLayout(): void {}
+  setProperty(key: string, value: any): void {
+    switch (key) {
+      case 'text':
+        {
+          this._props.text = '' + value;
+          if (this._widget)
+            this._widget.setProperty(hmUI.prop.TEXT, '' + value);
+        }
+        break;
+      case 'color':
+        {
+          this._props.color = value;
+          if (this._widget) this._widget.setProperty(hmUI.prop.COLOR, value);
+        }
+        break;
+      case 'text_size':
+        {
+          this._props.text_size = value;
+          if (this._widget)
+            this._widget.setProperty(hmUI.prop.TEXT_SIZE, value);
+        }
+        break;
+    }
+  }
 }

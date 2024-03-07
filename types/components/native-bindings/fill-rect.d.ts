@@ -1,7 +1,7 @@
 import { RenderWidget, WidgetFactory } from '../../core/base';
 import { Size, Coordinate } from '../../core/layout';
 type HmWidget = any;
-export declare class NativeWidgetText extends RenderWidget {
+export declare class NativeWidgetFillRect extends RenderWidget {
     _widget: HmWidget | null;
     _props: {
         color: number;

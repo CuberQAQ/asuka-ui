@@ -3,6 +3,7 @@ import { AsukaNode } from './base';
 export const NodeType = {
   TEXT_NODE: 1,
   RENDER_NODE: 2,
+  UNKNOWN_NODE: 4,
 };
 
 export function isRenderNode(node: AsukaNode | null) {
