@@ -1,4 +1,4 @@
-import { AsukaNode } from './base';
+import { AsukaNode } from "./base.js";
 
 /**
  * **向数组中插入或删除一个元素**

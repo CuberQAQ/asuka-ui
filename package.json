@@ -2,12 +2,18 @@
   "name": "@cuberqaq/asuka-ui",
   "version": "1.0.0",
   "description": "UI Framework for Zepp OS",
-  "main": "./dist/index.js",
-  "type": "module",
-  "types": "./types",
   "repository": "https://www.github.com/CuberQAQ/AsukaUI",
   "author": "CuberQAQ",
   "license": "MIT",
+  "main": "./dist",
+  "type": "module",
+  "types": "./types",
+  "files": [
+    "./dist",
+    "./src",
+    "./types",
+    "./readme.md"
+  ],
   "devDependencies": {
     "prettier": "3.2.5"
   },
@@ -15,7 +21,6 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@zeppos/device-types": "^3.0.0",
-    "solid-js": "^1.8.15"
+    "@zeppos/device-types": "^3.0.0"
   }
 }

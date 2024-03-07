@@ -1268,6 +1268,11 @@ export class AsukaUI {
   public viewRecord: Record<string | symbol, RenderView | null> = {};
   protected _activeFrame: RenderView | null = null;
   protected _nodeFactories: NodeFactory[] = [];
+  static instance: AsukaUI | null = null
+  constructor() {
+    assert(AsukaUI.instance === null) 
+    AsukaUI.instance = this
+  }
   get activeFrame() {
     return this._activeFrame;
   }
@@ -1277,7 +1282,7 @@ export class AsukaUI {
   }
   mountView(
     mount: WidgetFactory = hmUI,
-    options: { size?: Size; offset?: Coordinate },
+    options?: { size?: Size; offset?: Coordinate },
   ): RenderView {
     let size = options && options.size;
     let offset = (options && options.offset) || { x: 0, y: 0 };

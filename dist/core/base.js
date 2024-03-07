@@ -1049,6 +1049,8 @@ export class AsukaUI {
         this._nodesNeedsPlace = [];
         /** 异步管理器句柄(可能是setTimeout或者Promise之类的) */
         this._asyncHandler = null;
+        assert(AsukaUI.instance === null);
+        AsukaUI.instance = this;
     }
     get activeFrame() {
         return this._activeFrame;
@@ -1198,4 +1200,5 @@ export class AsukaUI {
         this._nodesNeedsPlace = [];
     }
 }
+AsukaUI.instance = null;
 //# sourceMappingURL=base.js.map

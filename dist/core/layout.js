@@ -3,8 +3,8 @@
 //   maxHeight: number;
 //   minWidth: number;
 //   maxWidth: number;
+import { assert } from "../debug/index.js";
 // }
-import { assert } from '../debug/index';
 /**
  * **布局约束类**
  * @description 布局约束，是指该节点的尺寸的允许范围。

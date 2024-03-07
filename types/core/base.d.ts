@@ -670,9 +670,11 @@ export declare class AsukaUI {
     viewRecord: Record<string | symbol, RenderView | null>;
     protected _activeFrame: RenderView | null;
     protected _nodeFactories: NodeFactory[];
+    static instance: AsukaUI | null;
+    constructor();
     get activeFrame(): RenderView | null;
     set activeFrame(frame: RenderView | null);
-    mountView(mount: WidgetFactory | undefined, options: {
+    mountView(mount?: WidgetFactory, options?: {
         size?: Size;
         offset?: Coordinate;
     }): RenderView;

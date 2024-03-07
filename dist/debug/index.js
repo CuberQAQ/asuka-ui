@@ -1,3 +1,4 @@
+/// <reference types="@zeppos/device-types" />
 import hmUI from '@zos/ui';
 import { log, px as _px } from '@zos/utils';
 const hmLogger = log.getLogger('AsukaUI');
