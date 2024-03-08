@@ -61,7 +61,7 @@ export class Constraints {
    * @param size
    * @returns
    */
-  static createTight(size: Size) {
+  static createTight(size: NullableSize) {
     return new Constraints({
       minWidth: size.w,
       maxWidth: size.w,
@@ -242,6 +242,11 @@ export interface Size {
   h: number;
 }
 
+export interface NullableSize {
+  w?: number;
+  h?: number;
+}
+
 export interface Coordinate {
   x: number;
   y: number;
@@ -369,6 +374,15 @@ export enum Axis {
 }
 
 /**
+ * 翻转轴向（水平变成垂直，垂直变成水平）
+ * @param axis 
+ * @returns 
+ */
+export function flipAxis(axis: Axis) {
+  return axis === Axis.horizontal ? Axis.vertical : Axis.horizontal;
+}
+
+/**
  * **主轴对齐方式**
  */
 export enum MainAxisAlignment {
@@ -455,15 +469,15 @@ export enum HorizontalDirection {
 /**
  * **竖直排布方向**
  */
-export enum VerticalDirection{
+export enum VerticalDirection {
   /**
    * **向上（从下到上）**
    */
-    up,
-    /**
-     * **向下（从上到下）**
-     */
-    down,
+  up,
+  /**
+   * **向下（从上到下）**
+   */
+  down,
 }
 
 /**

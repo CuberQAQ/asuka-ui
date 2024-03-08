@@ -976,9 +976,12 @@ export abstract class RenderNodeWithSingleChild extends RenderNode {
 export abstract class RenderNodeWithMultiChildren extends RenderNode {
   _firstChild: AsukaNode | null = null;
   _lastChild: AsukaNode | null = null;
-
+  _childRenderNodeCount: number = 0;
   get firstChild(): AsukaNode | null {
     return this._firstChild;
+  }
+  get childRenderNodeCount(): number {
+    return this._childRenderNodeCount;
   }
   visitChildren(handler: (child: RenderNode) => void): void {
     let nowChild = this._firstChild;
@@ -990,7 +993,6 @@ export abstract class RenderNodeWithMultiChildren extends RenderNode {
   }
   unmountChild(child: AsukaNode): boolean {
     if (child.parentNode !== this) return false;
-
     let previousSibling = child.parentData.previousSibling as AsukaNode | null;
     let nextSibling = child.parentData.nextSibling as AsukaNode | null;
     if (previousSibling) previousSibling.parentData.nextSibling = nextSibling;
@@ -1002,6 +1004,7 @@ export abstract class RenderNodeWithMultiChildren extends RenderNode {
       this._lastChild = child.parentData.previousSibling;
     }
     this._setupUnmountingChild(child);
+    if (isRenderNode(child)) --this._childRenderNodeCount;
     return true;
   }
   mountChild(child: AsukaNode, ref?: AsukaNode | null): boolean {
@@ -1013,8 +1016,9 @@ export abstract class RenderNodeWithMultiChildren extends RenderNode {
       child.parentData.previousSibling = previousSibling;
       ref.parentData.previousSibling = child;
       if (previousSibling) previousSibling.parentData.nextSibling = child;
-      child.parentData.nextSibling = ref
+      child.parentData.nextSibling = ref;
       if (ref === this._firstChild) this._firstChild = child;
+      if (isRenderNode(child)) ++this._childRenderNodeCount;
       return true;
     } else {
       this._setupMountingChild(child);
@@ -1023,7 +1027,8 @@ export abstract class RenderNodeWithMultiChildren extends RenderNode {
       child.parentData.previousSibling = lastChild;
       if (lastChild) lastChild.parentData.nextSibling = child;
       else this._firstChild = child;
-      child.parentData.nextSibling = null
+      child.parentData.nextSibling = null;
+      if (isRenderNode(child)) ++this._childRenderNodeCount;
       return true;
     }
   }
@@ -1268,10 +1273,10 @@ export class AsukaUI {
   public viewRecord: Record<string | symbol, RenderView | null> = {};
   protected _activeFrame: RenderView | null = null;
   protected _nodeFactories: NodeFactory[] = [];
-  static instance: AsukaUI | null = null
+  static instance: AsukaUI | null = null;
   constructor() {
-    assert(AsukaUI.instance === null) 
-    AsukaUI.instance = this
+    assert(AsukaUI.instance === null);
+    AsukaUI.instance = this;
   }
   get activeFrame() {
     return this._activeFrame;
