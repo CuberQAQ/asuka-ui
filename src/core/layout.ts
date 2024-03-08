@@ -113,12 +113,12 @@ export class Constraints {
     else if (this.minWidth > constrain.maxWidth)
       this.minWidth = constrain.maxWidth;
 
-    if (this.maxWidth > constrain.maxWidth)
-      this.maxWidth = constrain.maxWidth;
+    if (this.maxWidth > constrain.maxWidth) this.maxWidth = constrain.maxWidth;
     else if (this.maxWidth < constrain.minWidth)
       this.maxWidth = constrain.minWidth;
 
-    if (this.minHeight < constrain.minHeight) this.minHeight = constrain.minHeight;
+    if (this.minHeight < constrain.minHeight)
+      this.minHeight = constrain.minHeight;
     else if (this.minHeight > constrain.maxHeight)
       this.minHeight = constrain.maxHeight;
     if (this.maxHeight > constrain.maxHeight)
@@ -304,7 +304,7 @@ export class Alignment {
    * @param y [-1.0,1.0] 当-1为最上 0为中 1为最下
    */
   static create(x?: number | null, y?: number | null) {
-    return new Alignment(x, y)
+    return new Alignment(x, y);
   }
   static get topLeft() {
     return new Alignment(-1.0, -1.0);
@@ -352,4 +352,139 @@ export class Alignment {
   static copy(alignment: Alignment) {
     return new Alignment(alignment._x, alignment._y);
   }
+}
+
+/**
+ * **轴向**
+ */
+export enum Axis {
+  /**
+   * **水平**
+   */
+  horizontal,
+  /**
+   * **竖直**
+   */
+  vertical,
+}
+
+/**
+ * **主轴对齐方式**
+ */
+export enum MainAxisAlignment {
+  /**
+   * **顶头**
+   */
+  start,
+  /**
+   * **接尾**
+   */
+  end,
+  /**
+   * **居中**
+   */
+  center,
+  /**
+   * **顶头**接尾，其他均分
+   */
+  spaceBetween,
+  /**
+   * **中间**的孩子均分,两头的孩子空一半
+   */
+  spaceAround,
+  /**
+   * **均匀**平分
+   */
+  spaceEvenly,
+}
+
+/**
+ * **交叉对齐方式**
+ */
+export enum CrossAxisAlignment {
+  /**
+   * **顶头**
+   */
+  start,
+  /**
+   * **接尾**
+   */
+  end,
+  /**
+   * **居中**
+   */
+  center,
+  /**
+   * **伸展**
+   */
+  stretch,
+  /**
+   * **基线**
+   */
+  baseline,
+}
+
+/**
+ * **主轴尺寸**
+ */
+export enum MainAxisSize {
+  /**
+   * **尽可能小**
+   */
+  min,
+  /**
+   * **尽可能大**
+   */
+  max,
+}
+
+/**
+ * **水平排布方向**
+ */
+export enum HorizontalDirection {
+  /**
+   * **从左到右**
+   */
+  ltr,
+  /**
+   * **从右到左**
+   */
+  rtl,
+}
+
+/**
+ * **竖直排布方向**
+ */
+export enum VerticalDirection{
+  /**
+   * **向上（从下到上）**
+   */
+    up,
+    /**
+     * **向下（从上到下）**
+     */
+    down,
+}
+
+/**
+ * **文字基线**
+ */
+export enum TextBaseline {
+  alphabetic,
+  ideographic,
+}
+
+/**
+ * **Flexible组件的尺寸适应方式**
+ */
+export enum FlexFit {
+  /**
+   * **强制子节点尺寸为可能的最大值**
+   */
+  tight,
+  /**
+   * **允许子节点尺寸在最大值以内自由选择**
+   * @todo 这个到底是啥意思？
+   */
+  loose,
 }
