@@ -7,9 +7,9 @@ import { PreferSizeManager } from '../../tools/widget';
 
 type HmWidget = any;
 const defaultProps = {
-  color: 0xcc0000,
+  color: 0xcc4400,
 };
-export class NativeWidgetFillRect extends RenderWidget {
+export class NativeWidgetStrokeRect extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
@@ -27,7 +27,7 @@ export class NativeWidgetFillRect extends RenderWidget {
   }): void {
     if (initial) {
       assert(this._widget === null);
-      this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
+      this._widget = widgetFactory.createWidget(hmUI.widget.STROKE_RECT, {
         ...this._props,
         ...position,
         ...size,
@@ -57,7 +57,7 @@ export class NativeWidgetFillRect extends RenderWidget {
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
       case 'r':
-        case 'radius':
+      case 'radius':
         {
           this._props.radius = value;
           if (this._widget)
@@ -74,15 +74,23 @@ export class NativeWidgetFillRect extends RenderWidget {
           if (this._widget) this._widget.setProperty(hmUI.prop.COLOR, value);
         }
         break;
-      case 'alpha':
+      case 'angle':
         {
-          this._props.alpha = value;
+          this._props.angle = value;
           if (this._widget)
             this._widget.setProperty(hmUI.prop.MORE, {
               ...this.size,
               ...this.position,
               ...this._props,
             });
+        }
+        break;
+      case 'lw':
+      case 'line_width':
+        {
+          this._props.line_width = value;
+          if (this._widget)
+            this._widget.setProperty(hmUI.prop.LINE_WIDTH, value);
         }
         break;
     }

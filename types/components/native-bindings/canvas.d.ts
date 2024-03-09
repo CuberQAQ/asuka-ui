@@ -2,7 +2,7 @@ import { RenderWidget, WidgetFactory } from '../../core/base';
 import { Size, Coordinate } from '../../core/layout';
 import { PreferSizeManager } from '../../tools/widget';
 type HmWidget = any;
-export declare class NativeWidgetFillRect extends RenderWidget {
+export declare class NativeWidgetCanvas extends RenderWidget {
     _widget: HmWidget | null;
     _preferredSizeManager: PreferSizeManager;
     _props: Record<string, any>;
@@ -19,4 +19,4 @@ export declare class NativeWidgetFillRect extends RenderWidget {
     setProperty(key: string, value: any): void;
 }
 export {};
-//# sourceMappingURL=fill-rect%20copy.d.ts.map
+//# sourceMappingURL=canvas.d.ts.map

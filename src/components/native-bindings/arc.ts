@@ -8,8 +8,9 @@ import { PreferSizeManager } from '../../tools/widget';
 type HmWidget = any;
 const defaultProps = {
   color: 0xcc0000,
+  line_width: 5,
 };
-export class NativeWidgetFillRect extends RenderWidget {
+export class NativeWidgetArc extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
@@ -27,7 +28,7 @@ export class NativeWidgetFillRect extends RenderWidget {
   }): void {
     if (initial) {
       assert(this._widget === null);
-      this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
+      this._widget = widgetFactory.createWidget(hmUI.widget.ARC, {
         ...this._props,
         ...position,
         ...size,
@@ -56,33 +57,38 @@ export class NativeWidgetFillRect extends RenderWidget {
   setProperty(key: string, value: any): void {
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
-      case 'r':
-        case 'radius':
-        {
-          this._props.radius = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              ...this._props,
-            });
-        }
-        break;
       case 'color':
         {
           this._props.color = value;
           if (this._widget) this._widget.setProperty(hmUI.prop.COLOR, value);
         }
         break;
-      case 'alpha':
+      case 's':
+      case 'sa':
+      case 'start':
+      case 'start_angle':
         {
-          this._props.alpha = value;
+          this._props.start_angle = value;
           if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              ...this._props,
-            });
+            this._widget.setProperty(hmUI.prop.START_ANGLE, value);
+        }
+        break;
+      case 'e':
+      case 'ea':
+      case 'end':
+      case 'end_angle':
+        {
+          this._props.end_angle = value;
+          if (this._widget)
+            this._widget.setProperty(hmUI.prop.END_ANGLE, value);
+        }
+        break;
+      case 'lw':
+      case 'line_width':
+        {
+          this._props.line_width = value;
+          if (this._widget)
+            this._widget.setProperty(hmUI.prop.LINE_WIDTH, value);
         }
         break;
     }

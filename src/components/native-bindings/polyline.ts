@@ -6,10 +6,8 @@ import { px } from '@zos/utils';
 import { PreferSizeManager } from '../../tools/widget';
 
 type HmWidget = any;
-const defaultProps = {
-  color: 0xcc0000,
-};
-export class NativeWidgetFillRect extends RenderWidget {
+const defaultProps = {};
+export class NativeWidgetPolyline extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
@@ -27,11 +25,14 @@ export class NativeWidgetFillRect extends RenderWidget {
   }): void {
     if (initial) {
       assert(this._widget === null);
-      this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
-        ...this._props,
-        ...position,
-        ...size,
-      });
+      this._widget = widgetFactory.createWidget(
+        (hmUI.widget as any).GRADKIENT_POLYLINE,
+        {
+          ...this._props,
+          ...position,
+          ...size,
+        },
+      );
     } else {
       assert(this._widget != null);
       this._widget!.setProperty(hmUI.prop.MORE, {
@@ -56,33 +57,20 @@ export class NativeWidgetFillRect extends RenderWidget {
   setProperty(key: string, value: any): void {
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
-      case 'r':
-        case 'radius':
-        {
-          this._props.radius = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              ...this._props,
-            });
-        }
-        break;
       case 'color':
+      case 'line_color':
         {
-          this._props.color = value;
-          if (this._widget) this._widget.setProperty(hmUI.prop.COLOR, value);
+          this._props.line_color = value;
+          if (this._widget)
+            this._widget.setProperty((hmUI.prop as any).LINE_COLOR, value);
         }
         break;
-      case 'alpha':
+      case 'lw':
+      case 'line_width':
         {
-          this._props.alpha = value;
+          this._props.line_width = value;
           if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              ...this._props,
-            });
+            this._widget.setProperty(hmUI.prop.LINE_WIDTH, value);
         }
         break;
     }

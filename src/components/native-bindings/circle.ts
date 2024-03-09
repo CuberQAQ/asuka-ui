@@ -4,16 +4,25 @@ import { Size, Coordinate, Constraints } from '../../core/layout';
 import { assert } from '../../debug/index';
 import { px } from '@zos/utils';
 import { PreferSizeManager } from '../../tools/widget';
+import { min } from '../../tools';
 
 type HmWidget = any;
 const defaultProps = {
-  color: 0xcc0000,
+  color: 0xff8888,
 };
-export class NativeWidgetFillRect extends RenderWidget {
+export class NativeWidgetCircle extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
   sizedByParent: boolean = false;
+  _fromSizeAndPositionToProp(size: Size, position: Coordinate) {
+    let radius = min(size.h, size.w) / 2;
+    return {
+      radius,
+      center_x: position.x + size.w / 2 - radius,
+      center_y: position.y + size.h / 2 - radius,
+    };
+  }
   onCommit({
     size,
     position,
@@ -29,15 +38,13 @@ export class NativeWidgetFillRect extends RenderWidget {
       assert(this._widget === null);
       this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
         ...this._props,
-        ...position,
-        ...size,
+        ...this._fromSizeAndPositionToProp(size, position),
       });
     } else {
       assert(this._widget != null);
       this._widget!.setProperty(hmUI.prop.MORE, {
         ...this._props,
-        ...position,
-        ...size,
+        ...this._fromSizeAndPositionToProp(size, position),
       });
     }
   }
@@ -57,15 +64,9 @@ export class NativeWidgetFillRect extends RenderWidget {
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
       case 'r':
-        case 'radius':
+      case 'radius':
         {
-          this._props.radius = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              ...this._props,
-            });
+          this._preferredSizeManager.setDefaultSize({w: value, h: value})
         }
         break;
       case 'color':

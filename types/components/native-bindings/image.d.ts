@@ -16,6 +16,7 @@ export declare class NativeWidgetImage extends RenderWidget {
     onDestroy(widgetFactory: WidgetFactory): void;
     performResize(): void;
     performLayout(): void;
+    _updateDefaultSize(): void;
     setProperty(key: string, value: any): void;
 }
 export {};

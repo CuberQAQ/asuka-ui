@@ -7,9 +7,10 @@ import { PreferSizeManager } from '../../tools/widget';
 
 type HmWidget = any;
 const defaultProps = {
-  color: 0xcc0000,
+  content: 'null',
 };
-export class NativeWidgetFillRect extends RenderWidget {
+// Not support bg_x bg_y bg_w bg_h, please use container or stack etc to add background decoration.
+export class NativeWidgetQRCode extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
@@ -27,7 +28,7 @@ export class NativeWidgetFillRect extends RenderWidget {
   }): void {
     if (initial) {
       assert(this._widget === null);
-      this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
+      this._widget = widgetFactory.createWidget((hmUI.widget as any).QRCODE, {
         ...this._props,
         ...position,
         ...size,
@@ -56,32 +57,14 @@ export class NativeWidgetFillRect extends RenderWidget {
   setProperty(key: string, value: any): void {
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
-      case 'r':
-        case 'radius':
+      case 'content':
         {
-          this._props.radius = value;
+          this._props.content = value;
           if (this._widget)
             this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
               ...this.position,
-              ...this._props,
-            });
-        }
-        break;
-      case 'color':
-        {
-          this._props.color = value;
-          if (this._widget) this._widget.setProperty(hmUI.prop.COLOR, value);
-        }
-        break;
-      case 'alpha':
-        {
-          this._props.alpha = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
               ...this.size,
-              ...this.position,
-              ...this._props,
+              content: value,
             });
         }
         break;

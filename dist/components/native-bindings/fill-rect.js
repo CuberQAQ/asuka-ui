@@ -39,11 +39,12 @@ export class NativeWidgetFillRect extends RenderWidget {
     setProperty(key, value) {
         this._preferredSizeManager.setProperty(key, value);
         switch (key) {
+            case 'r':
             case 'radius':
                 {
                     this._props.radius = value;
                     if (this._widget)
-                        this._widget.setProperty(hmUI.prop.MORE, Object.assign({}, this._props));
+                        this._widget.setProperty(hmUI.prop.MORE, Object.assign(Object.assign(Object.assign({}, this.size), this.position), this._props));
                 }
                 break;
             case 'color':
@@ -57,7 +58,7 @@ export class NativeWidgetFillRect extends RenderWidget {
                 {
                     this._props.alpha = value;
                     if (this._widget)
-                        this._widget.setProperty(hmUI.prop.MORE, Object.assign({}, this._props));
+                        this._widget.setProperty(hmUI.prop.MORE, Object.assign(Object.assign(Object.assign({}, this.size), this.position), this._props));
                 }
                 break;
         }

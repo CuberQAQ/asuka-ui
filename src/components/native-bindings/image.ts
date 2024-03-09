@@ -10,7 +10,7 @@ const defaultProps = {};
 export class NativeWidgetImage extends RenderWidget {
   _widget: HmWidget | null = null;
   _props: Record<string, any> = { ...defaultProps };
-  _preferredSizeManager: PreferSizeManager = new PreferSizeManager(this)
+  _preferredSizeManager: PreferSizeManager = new PreferSizeManager(this);
   sizedByParent: boolean = false;
   onCommit({
     size,
@@ -45,26 +45,109 @@ export class NativeWidgetImage extends RenderWidget {
   }
   performResize(): void {}
   performLayout(): void {}
+  _updateDefaultSize() {
+    if (this._props.src) {
+      let { width, height } = (hmUI as any).getImageInfo(this._props.src);
+      this._preferredSizeManager.setDefaultSize({ w: width, h: height });
+    }
+  }
   setProperty(key: string, value: any): void {
+    this._preferredSizeManager.setProperty(key, value);
     switch (key) {
-      case 'radius':
-        {
-          this._props.radius = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, { ...this._props });
-        }
-        break;
       case 'color':
-        {
+        if (value !== this._props.color) {
           this._props.color = value;
           if (this._widget) this._widget.setProperty(hmUI.prop.COLOR, value);
         }
         break;
       case 'alpha':
         {
-          this._props.alpha = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, { ...this._props });
+          if (value !== this._props.alpha) {
+            this._props.alpha = value;
+            if (this._widget)
+              this._widget.setProperty(hmUI.prop.MORE, { ...this._props });
+          }
+        }
+        break;
+      case 'pos_x':
+        {
+          if (value !== this._props.pos_x) {
+            this._props.pos_x = value;
+            if (this._widget) this._widget.setProperty(hmUI.prop.POS_X, value);
+          }
+        }
+        break;
+      case 'pos_y':
+        {
+          if (value !== this._props.pos_y) {
+            this._props.pos_y = value;
+            if (this._widget) this._widget.setProperty(hmUI.prop.POS_Y, value);
+          }
+        }
+        break;
+      case 'angle':
+        {
+          if (value !== this._props.angle) {
+            this._props.angle = value;
+            if (this._widget) this._widget.setProperty(hmUI.prop.ANGLE, value);
+          }
+        }
+        break;
+      case 'center_x':
+        {
+          if (value !== this._props.center_x) {
+            this._props.center_x = value;
+            if (this._widget)
+              this._widget.setProperty(hmUI.prop.CENTER_X, value);
+          }
+        }
+        break;
+      case 'center_y':
+        {
+          if (value !== this._props.center_y) {
+            this._props.center_y = value;
+            if (this._widget)
+              this._widget.setProperty(hmUI.prop.CENTER_Y, value);
+          }
+        }
+        break;
+      case 'alpha':
+        {
+          if (value !== this._props.alpha) {
+            this._props.alpha = value;
+            if (this._widget)
+              this._widget.setProperty((hmUI.prop as any).ALPHA, value);
+          }
+        }
+        break;
+      case 'auto_scale':
+        {
+          if (value !== this._props.auto_scale) {
+            this._props.auto_scale = value;
+            if (this._widget)
+              this._widget.setProperty(hmUI.prop.MORE, {
+                ...this._props,
+              });
+          }
+        }
+        break;
+      case 'auto_scale_obj_fit':
+        {
+          if (value !== this._props.auto_scale_obj_fit) {
+            this._props.auto_scale_obj_fit = value;
+            if (this._widget)
+              this._widget.setProperty(hmUI.prop.MORE, {
+                ...this._props,
+              });
+          }
+        }
+        break;
+      case 'src':
+        {
+          if (value !== this._props.src) {
+            this._props.src = value;
+            if (this._widget) this._widget.setProperty(hmUI.prop.SRC, value);
+          }
         }
         break;
     }
