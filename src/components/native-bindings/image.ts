@@ -3,13 +3,14 @@ import { RenderWidget, WidgetFactory } from '../../core/base';
 import { Size, Coordinate, Constraints } from '../../core/layout';
 import { assert } from '../../debug/index';
 import { px } from '@zos/utils';
+import { PreferSizeManager } from '../../tools/widget';
 
 type HmWidget = any;
-const defaultProps = {
-};
+const defaultProps = {};
 export class NativeWidgetImage extends RenderWidget {
   _widget: HmWidget | null = null;
   _props: Record<string, any> = { ...defaultProps };
+  _preferredSizeManager: PreferSizeManager = new PreferSizeManager(this)
   sizedByParent: boolean = false;
   onCommit({
     size,
@@ -29,8 +30,7 @@ export class NativeWidgetImage extends RenderWidget {
         ...position,
         ...size,
       });
-    }
-    else {
+    } else {
       assert(this._widget != null);
       this._widget!.setProperty(hmUI.prop.MORE, {
         ...this._props,
@@ -43,13 +43,8 @@ export class NativeWidgetImage extends RenderWidget {
     assert(widgetFactory !== null && this._widget !== null);
     widgetFactory.deleteWidget(this._widget);
   }
-  performResize(): void {
-    assert(Constraints.isValid(this._constraints));
-    this.size = this._constraints!.maxSize();
-  }
-  performLayout(): void {
-    // assert(()=>{throw Error("Test Point 2")})
-  }
+  performResize(): void {}
+  performLayout(): void {}
   setProperty(key: string, value: any): void {
     switch (key) {
       case 'radius':

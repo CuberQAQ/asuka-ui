@@ -9,7 +9,7 @@ export class LayoutWidgetCenter extends RenderNodeWithSingleChild {
   sizedByParent: boolean = true;
   performResize(): void {
     assert(this._constraints != null);
-    this.size = this._constraints!.maxSize();
+    this.size = this._constraints!.biggest;
   }
   performLayout(): void {
     assert(this.size != null);

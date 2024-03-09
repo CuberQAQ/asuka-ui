@@ -790,6 +790,11 @@ export class RenderNodeWithSingleChild extends RenderNode {
     getChildNextSibling(child) {
         return null;
     }
+    setProperty(key, value) {
+        if (key === 'child' && value instanceof AsukaNode) {
+            this.child = value;
+        }
+    }
 }
 /**
  * **可包含多个子节点的RenderNode**
@@ -801,9 +806,13 @@ export class RenderNodeWithMultiChildren extends RenderNode {
         super(...arguments);
         this._firstChild = null;
         this._lastChild = null;
+        this._childRenderNodeCount = 0;
     }
     get firstChild() {
         return this._firstChild;
+    }
+    get childRenderNodeCount() {
+        return this._childRenderNodeCount;
     }
     visitChildren(handler) {
         let nowChild = this._firstChild;
@@ -830,6 +839,8 @@ export class RenderNodeWithMultiChildren extends RenderNode {
             this._lastChild = child.parentData.previousSibling;
         }
         this._setupUnmountingChild(child);
+        if (isRenderNode(child))
+            --this._childRenderNodeCount;
         return true;
     }
     mountChild(child, ref) {
@@ -846,6 +857,8 @@ export class RenderNodeWithMultiChildren extends RenderNode {
             child.parentData.nextSibling = ref;
             if (ref === this._firstChild)
                 this._firstChild = child;
+            if (isRenderNode(child))
+                ++this._childRenderNodeCount;
             return true;
         }
         else {
@@ -858,12 +871,38 @@ export class RenderNodeWithMultiChildren extends RenderNode {
             else
                 this._firstChild = child;
             child.parentData.nextSibling = null;
+            if (isRenderNode(child))
+                ++this._childRenderNodeCount;
             return true;
         }
     }
     getChildNextSibling(child) {
         return child.parentData.nextSibling;
     }
+}
+export class RenderNodeProxy extends RenderNodeWithSingleChild {
+    constructor() {
+        super(...arguments);
+        this.sizedByParent = false;
+    }
+    performResize() { }
+    performLayout() {
+        assert(this._constraints != null);
+        if (isRenderNode(this.child)) {
+            assert(this._widgetFactory != null);
+            let child = this.child;
+            child.layout(this._constraints, {
+                parentUsesSize: true,
+                widgetFactory: this._widgetFactory,
+            });
+            this.size = child.size;
+            child.offset = { x: 0, y: 0 };
+        }
+        else {
+            this.size = this._constraints.smallest;
+        }
+    }
+    performCommit() { }
 }
 /**
  * **事件类**

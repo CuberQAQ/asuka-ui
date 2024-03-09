@@ -536,6 +536,7 @@ export declare abstract class RenderNodeWithSingleChild extends RenderNode {
     unmountChild(child: AsukaNode): boolean;
     mountChild(child: AsukaNode): boolean;
     getChildNextSibling(child: AsukaNode): AsukaNode | null;
+    setProperty(key: string, value: any): void;
 }
 /**
  * **可包含多个子节点的RenderNode**
@@ -545,11 +546,19 @@ export declare abstract class RenderNodeWithSingleChild extends RenderNode {
 export declare abstract class RenderNodeWithMultiChildren extends RenderNode {
     _firstChild: AsukaNode | null;
     _lastChild: AsukaNode | null;
+    _childRenderNodeCount: number;
     get firstChild(): AsukaNode | null;
+    get childRenderNodeCount(): number;
     visitChildren(handler: (child: RenderNode) => void): void;
     unmountChild(child: AsukaNode): boolean;
     mountChild(child: AsukaNode, ref?: AsukaNode | null): boolean;
     getChildNextSibling(child: AsukaNode): AsukaNode | null;
+}
+export declare class RenderNodeProxy extends RenderNodeWithSingleChild {
+    sizedByParent: boolean;
+    performResize(): void;
+    performLayout(): void;
+    performCommit(): void;
 }
 /**
  * **事件类**

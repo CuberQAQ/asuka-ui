@@ -72,6 +72,42 @@ export class Constraints {
             constraints.minHeight <= constraints.maxHeight &&
             constraints.minWidth <= constraints.maxWidth);
     }
+    static copy(constraints) {
+        return new Constraints({
+            minWidth: constraints.minWidth,
+            maxWidth: constraints.maxWidth,
+            minHeight: constraints.minHeight,
+            maxHeight: constraints.maxHeight,
+        });
+    }
+    copy() {
+        return new Constraints({
+            minWidth: this.minWidth,
+            maxWidth: this.maxWidth,
+            minHeight: this.minHeight,
+            maxHeight: this.maxHeight,
+        });
+    }
+    /**
+     * 返回一个新的约束对象，使其在遵守原约束对象的同时尽可能向指定的长宽缩进
+     * @param param0
+     */
+    tighten({ width, height }) {
+        let constraints = this.copy();
+        if (width !== undefined) {
+            if (width > this.minWidth)
+                constraints.minWidth = min(width, this.maxWidth);
+            if (width < this.maxWidth)
+                constraints.maxWidth = max(width, this.minWidth);
+        }
+        if (height !== undefined) {
+            if (height > this.minHeight)
+                constraints.minHeight = min(height, this.maxHeight);
+            if (height < this.maxHeight)
+                constraints.maxHeight = max(height, this.minHeight);
+        }
+        return constraints;
+    }
     /**
      * **约束操作**
      * @description
@@ -134,10 +170,19 @@ export class Constraints {
     /**
      * **返回符合该约束的最大尺寸**
      */
-    maxSize() {
+    get biggest() {
         return {
             w: this.maxWidth,
             h: this.maxHeight,
+        };
+    }
+    /**
+     * **返回符合该约束的最小尺寸**
+     */
+    get smallest() {
+        return {
+            w: this.minWidth,
+            h: this.minHeight,
         };
     }
     /**
@@ -170,6 +215,16 @@ export class Constraints {
             maxHeight: this.maxHeight,
         });
     }
+    /**
+     * **检测一个`Size`对象是否符合本约束要求**
+     * @param size 要检测的`Size`对象
+     */
+    testSize(size) {
+        return (size.h >= this.minHeight &&
+            size.h <= this.maxHeight &&
+            size.w >= this.minWidth &&
+            size.w <= this.maxWidth);
+    }
 }
 export class Size {
     static equals(size1, size2) {
@@ -186,6 +241,14 @@ export class Size {
             size.w >= 0 &&
             isFinite(size.h) &&
             isFinite(size.w));
+    }
+    /**
+     * **判断一个`Size`对象是不是有穷的**
+     * @param size 要判断的`Size`对象
+     * @returns 是否有穷
+     */
+    static isFinite(size) {
+        return Number.isFinite(size.w) && Number.isFinite(size.h);
     }
     static copy(size) {
         assert(size != null);
@@ -331,4 +394,244 @@ export class Alignment {
         return new Alignment(alignment._x, alignment._y);
     }
 }
+/**
+ * **轴向**
+ */
+export var Axis;
+(function (Axis) {
+    /**
+     * **水平**
+     */
+    Axis[Axis["horizontal"] = 0] = "horizontal";
+    /**
+     * **竖直**
+     */
+    Axis[Axis["vertical"] = 1] = "vertical";
+})(Axis || (Axis = {}));
+/**
+ * 翻转轴向（水平变成垂直，垂直变成水平）
+ * @param axis
+ * @returns
+ */
+export function flipAxis(axis) {
+    return axis === Axis.horizontal ? Axis.vertical : Axis.horizontal;
+}
+/**
+ * **主轴对齐方式**
+ */
+export var MainAxisAlignment;
+(function (MainAxisAlignment) {
+    /**
+     * **顶头**
+     */
+    MainAxisAlignment[MainAxisAlignment["start"] = 0] = "start";
+    /**
+     * **接尾**
+     */
+    MainAxisAlignment[MainAxisAlignment["end"] = 1] = "end";
+    /**
+     * **居中**
+     */
+    MainAxisAlignment[MainAxisAlignment["center"] = 2] = "center";
+    /**
+     * **顶头**接尾，其他均分
+     */
+    MainAxisAlignment[MainAxisAlignment["spaceBetween"] = 3] = "spaceBetween";
+    /**
+     * **中间**的孩子均分,两头的孩子空一半
+     */
+    MainAxisAlignment[MainAxisAlignment["spaceAround"] = 4] = "spaceAround";
+    /**
+     * **均匀**平分
+     */
+    MainAxisAlignment[MainAxisAlignment["spaceEvenly"] = 5] = "spaceEvenly";
+})(MainAxisAlignment || (MainAxisAlignment = {}));
+/**
+ * **交叉对齐方式**
+ */
+export var CrossAxisAlignment;
+(function (CrossAxisAlignment) {
+    /**
+     * **顶头**
+     */
+    CrossAxisAlignment[CrossAxisAlignment["start"] = 0] = "start";
+    /**
+     * **接尾**
+     */
+    CrossAxisAlignment[CrossAxisAlignment["end"] = 1] = "end";
+    /**
+     * **居中**
+     */
+    CrossAxisAlignment[CrossAxisAlignment["center"] = 2] = "center";
+    /**
+     * **伸展**
+     */
+    CrossAxisAlignment[CrossAxisAlignment["stretch"] = 3] = "stretch";
+    /**
+     * **基线**
+     */
+    CrossAxisAlignment[CrossAxisAlignment["baseline"] = 4] = "baseline";
+})(CrossAxisAlignment || (CrossAxisAlignment = {}));
+/**
+ * **主轴尺寸**
+ */
+export var MainAxisSize;
+(function (MainAxisSize) {
+    /**
+     * **尽可能小**
+     */
+    MainAxisSize[MainAxisSize["min"] = 0] = "min";
+    /**
+     * **尽可能大**
+     */
+    MainAxisSize[MainAxisSize["max"] = 1] = "max";
+})(MainAxisSize || (MainAxisSize = {}));
+/**
+ * **水平排布方向**
+ */
+export var HorizontalDirection;
+(function (HorizontalDirection) {
+    /**
+     * **从左到右**
+     */
+    HorizontalDirection[HorizontalDirection["ltr"] = 0] = "ltr";
+    /**
+     * **从右到左**
+     */
+    HorizontalDirection[HorizontalDirection["rtl"] = 1] = "rtl";
+})(HorizontalDirection || (HorizontalDirection = {}));
+/**
+ * **竖直排布方向**
+ */
+export var VerticalDirection;
+(function (VerticalDirection) {
+    /**
+     * **向上（从下到上）**
+     */
+    VerticalDirection[VerticalDirection["up"] = 0] = "up";
+    /**
+     * **向下（从上到下）**
+     */
+    VerticalDirection[VerticalDirection["down"] = 1] = "down";
+})(VerticalDirection || (VerticalDirection = {}));
+/**
+ * **文字基线**
+ */
+export var TextBaseline;
+(function (TextBaseline) {
+    TextBaseline[TextBaseline["alphabetic"] = 0] = "alphabetic";
+    TextBaseline[TextBaseline["ideographic"] = 1] = "ideographic";
+})(TextBaseline || (TextBaseline = {}));
+/**
+ * **Flexible组件的尺寸适应方式**
+ */
+export var FlexFit;
+(function (FlexFit) {
+    /**
+     * **强制子节点尺寸为可能的最大值**
+     */
+    FlexFit[FlexFit["tight"] = 0] = "tight";
+    /**
+     * **允许子节点尺寸在最大值以内自由选择**
+     * @todo 这个到底是啥意思？
+     */
+    FlexFit[FlexFit["loose"] = 1] = "loose";
+})(FlexFit || (FlexFit = {}));
+/**
+ * **边距**
+ */
+export class EdgeInsets {
+    constructor({ left, up, right, down, }) {
+        this._left = left;
+        this._up = up;
+        this._right = right;
+        this._down = down;
+    }
+    static all(value) {
+        return new EdgeInsets({
+            left: value,
+            up: value,
+            right: value,
+            down: value,
+        });
+    }
+    static only(value) {
+        var _a, _b, _c, _d;
+        return new EdgeInsets({
+            left: (_a = value === null || value === void 0 ? void 0 : value.left) !== null && _a !== void 0 ? _a : 0,
+            up: (_b = value === null || value === void 0 ? void 0 : value.up) !== null && _b !== void 0 ? _b : 0,
+            right: (_c = value === null || value === void 0 ? void 0 : value.right) !== null && _c !== void 0 ? _c : 0,
+            down: (_d = value === null || value === void 0 ? void 0 : value.down) !== null && _d !== void 0 ? _d : 0,
+        });
+    }
+    static symmetric({ vertical, horizontal, }) {
+        return new EdgeInsets({
+            left: horizontal,
+            up: vertical,
+            right: horizontal,
+            down: vertical,
+        });
+    }
+    static get zero() {
+        return EdgeInsets.only();
+    }
+    equals(e) {
+        if (e == null)
+            return false;
+        return (this._left === e._left &&
+            this._down === e._down &&
+            this._right === e._right &&
+            this._up === e._up);
+    }
+    get horizontalTotal() {
+        return this._left + this._right;
+    }
+    get verticalTotal() {
+        return this._up + this._down;
+    }
+    getInnerConstraints(outterConstraints) {
+        return new Constraints({
+            minWidth: outterConstraints.minWidth - this.verticalTotal,
+            maxWidth: outterConstraints.maxWidth - this.verticalTotal,
+            minHeight: outterConstraints.minHeight - this.horizontalTotal,
+            maxHeight: outterConstraints.maxHeight - this.horizontalTotal,
+        });
+    }
+    /**
+     * **获取仅包含padding占用空间的`Size`对象**
+     */
+    get totalSizeWithoutInner() {
+        return {
+            w: this.horizontalTotal,
+            h: this.verticalTotal,
+        };
+    }
+    getOutterSize(innerSize) {
+        return {
+            w: innerSize.w + this.horizontalTotal,
+            h: innerSize.h + this.verticalTotal,
+        };
+    }
+    get innerOffset() {
+        return {
+            x: this._left,
+            y: this._up,
+        };
+    }
+}
+export var StackFit;
+(function (StackFit) {
+    /**
+     * 将Stack的约束宽松后传给子组件
+     */
+    StackFit[StackFit["loose"] = 0] = "loose";
+    /**
+     * 将Stack的约束严格化后传给子组件
+     */
+    StackFit[StackFit["expand"] = 1] = "expand";
+    /**
+     * 将Stack的约束原样传递给子组件
+     */
+    StackFit[StackFit["passthrough"] = 2] = "passthrough";
+})(StackFit || (StackFit = {}));
 //# sourceMappingURL=layout.js.map

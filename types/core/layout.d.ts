@@ -33,8 +33,18 @@ export declare class Constraints {
      * @param size
      * @returns
      */
-    static createTight(size: Size): Constraints;
+    static createTight(size: NullableSize): Constraints;
     static isValid(constraints: Constraints | null): boolean;
+    static copy(constraints: Constraints): Constraints;
+    copy(): Constraints;
+    /**
+     * 返回一个新的约束对象，使其在遵守原约束对象的同时尽可能向指定的长宽缩进
+     * @param param0
+     */
+    tighten({ width, height }: {
+        width?: number;
+        height?: number;
+    }): Constraints;
     /**
      * **约束操作**
      * @description
@@ -63,7 +73,11 @@ export declare class Constraints {
     /**
      * **返回符合该约束的最大尺寸**
      */
-    maxSize(): Size;
+    get biggest(): Size;
+    /**
+     * **返回符合该约束的最小尺寸**
+     */
+    get smallest(): Size;
     /**
      * **是否为严格约束**
      * @description
@@ -79,10 +93,21 @@ export declare class Constraints {
      */
     equals(other: Constraints | null): boolean;
     toString(): string;
+    /**
+     * **检测一个`Size`对象是否符合本约束要求**
+     * @param size 要检测的`Size`对象
+     */
+    testSize(size: Size): boolean;
 }
 export declare class Size {
     static equals(size1: Size | null, size2: Size | null): boolean;
     static isValid(size: Size | null): boolean;
+    /**
+     * **判断一个`Size`对象是不是有穷的**
+     * @param size 要判断的`Size`对象
+     * @returns 是否有穷
+     */
+    static isFinite(size: Size): boolean;
     static copy(size: Size): {
         w: number;
         h: number;
@@ -111,6 +136,10 @@ export declare class Size {
 export interface Size {
     w: number;
     h: number;
+}
+export interface NullableSize {
+    w?: number;
+    h?: number;
 }
 export interface Coordinate {
     x: number;
@@ -170,5 +199,189 @@ export declare class Alignment {
      */
     calcOffset(parentSize: Size, childSize: Size): Coordinate;
     static copy(alignment: Alignment): Alignment;
+}
+/**
+ * **轴向**
+ */
+export declare enum Axis {
+    /**
+     * **水平**
+     */
+    horizontal = 0,
+    /**
+     * **竖直**
+     */
+    vertical = 1
+}
+/**
+ * 翻转轴向（水平变成垂直，垂直变成水平）
+ * @param axis
+ * @returns
+ */
+export declare function flipAxis(axis: Axis): Axis;
+/**
+ * **主轴对齐方式**
+ */
+export declare enum MainAxisAlignment {
+    /**
+     * **顶头**
+     */
+    start = 0,
+    /**
+     * **接尾**
+     */
+    end = 1,
+    /**
+     * **居中**
+     */
+    center = 2,
+    /**
+     * **顶头**接尾，其他均分
+     */
+    spaceBetween = 3,
+    /**
+     * **中间**的孩子均分,两头的孩子空一半
+     */
+    spaceAround = 4,
+    /**
+     * **均匀**平分
+     */
+    spaceEvenly = 5
+}
+/**
+ * **交叉对齐方式**
+ */
+export declare enum CrossAxisAlignment {
+    /**
+     * **顶头**
+     */
+    start = 0,
+    /**
+     * **接尾**
+     */
+    end = 1,
+    /**
+     * **居中**
+     */
+    center = 2,
+    /**
+     * **伸展**
+     */
+    stretch = 3,
+    /**
+     * **基线**
+     */
+    baseline = 4
+}
+/**
+ * **主轴尺寸**
+ */
+export declare enum MainAxisSize {
+    /**
+     * **尽可能小**
+     */
+    min = 0,
+    /**
+     * **尽可能大**
+     */
+    max = 1
+}
+/**
+ * **水平排布方向**
+ */
+export declare enum HorizontalDirection {
+    /**
+     * **从左到右**
+     */
+    ltr = 0,
+    /**
+     * **从右到左**
+     */
+    rtl = 1
+}
+/**
+ * **竖直排布方向**
+ */
+export declare enum VerticalDirection {
+    /**
+     * **向上（从下到上）**
+     */
+    up = 0,
+    /**
+     * **向下（从上到下）**
+     */
+    down = 1
+}
+/**
+ * **文字基线**
+ */
+export declare enum TextBaseline {
+    alphabetic = 0,
+    ideographic = 1
+}
+/**
+ * **Flexible组件的尺寸适应方式**
+ */
+export declare enum FlexFit {
+    /**
+     * **强制子节点尺寸为可能的最大值**
+     */
+    tight = 0,
+    /**
+     * **允许子节点尺寸在最大值以内自由选择**
+     * @todo 这个到底是啥意思？
+     */
+    loose = 1
+}
+/**
+ * **边距**
+ */
+export declare class EdgeInsets {
+    _left: number;
+    _up: number;
+    _right: number;
+    _down: number;
+    constructor({ left, up, right, down, }: {
+        left: number;
+        up: number;
+        right: number;
+        down: number;
+    });
+    static all(value: number): EdgeInsets;
+    static only(value?: {
+        left?: number;
+        up?: number;
+        right?: number;
+        down?: number;
+    }): EdgeInsets;
+    static symmetric({ vertical, horizontal, }: {
+        vertical: number;
+        horizontal: number;
+    }): EdgeInsets;
+    static get zero(): EdgeInsets;
+    equals(e: EdgeInsets | null): boolean;
+    get horizontalTotal(): number;
+    get verticalTotal(): number;
+    getInnerConstraints(outterConstraints: Constraints): Constraints;
+    /**
+     * **获取仅包含padding占用空间的`Size`对象**
+     */
+    get totalSizeWithoutInner(): Size;
+    getOutterSize(innerSize: Size): Size;
+    get innerOffset(): Coordinate;
+}
+export declare enum StackFit {
+    /**
+     * 将Stack的约束宽松后传给子组件
+     */
+    loose = 0,
+    /**
+     * 将Stack的约束严格化后传给子组件
+     */
+    expand = 1,
+    /**
+     * 将Stack的约束原样传递给子组件
+     */
+    passthrough = 2
 }
 //# sourceMappingURL=layout.d.ts.map

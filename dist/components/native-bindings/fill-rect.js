@@ -30,7 +30,7 @@ export class NativeWidgetFillRect extends RenderWidget {
     }
     performResize() {
         assert(Constraints.isValid(this._constraints));
-        this.size = this._constraints.maxSize();
+        this.size = this._constraints.biggest;
     }
     performLayout() {
         this._preferredSizeManager.chooseSize();

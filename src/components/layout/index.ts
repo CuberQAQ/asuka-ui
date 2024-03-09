@@ -9,9 +9,11 @@ import {
   LayoutWidgetSpacer,
 } from './flex';
 import { LayoutWidgetHStack } from './hstack';
+import { LayoutWidgetPadding } from './padding';
 import { LayoutWidgetRow } from './row';
 import { LayoutWidgetSizedBox } from './sizedbox';
 import { LayoutWidgetVStack } from './vstack';
+import { LayoutWidgetPositioned, LayoutWidgetZStack } from './zstack';
 
 export const LayoutManagerFactory: NodeFactory = {
   createNode(type) {
@@ -23,6 +25,7 @@ export const LayoutManagerFactory: NodeFactory = {
       case 'center':
         return new LayoutWidgetCenter(null, type);
       case 'sizedbox':
+      case 'sized-box':
         return new LayoutWidgetSizedBox(null, type);
       case 'align':
         return new LayoutWidgetAlign(null, type);
@@ -38,7 +41,13 @@ export const LayoutManagerFactory: NodeFactory = {
         return new LayoutWidgetRow(null, type);
       case 'column':
         return new LayoutWidgetColumn(null, type);
-
+      case 'padding':
+        return new LayoutWidgetPadding(null, type);
+      case 'stack':
+      case 'zstack':
+        return new LayoutWidgetZStack(null, type);
+      case 'positioned':
+        return new LayoutWidgetPositioned(null, type);
       default:
         return null;
     }

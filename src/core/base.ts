@@ -966,6 +966,11 @@ export abstract class RenderNodeWithSingleChild extends RenderNode {
   getChildNextSibling(child: AsukaNode): AsukaNode | null {
     return null;
   }
+  setProperty(key: string, value: any): void {
+    if (key === 'child' && value instanceof AsukaNode) {
+      this.child = value;
+    }
+  }
 }
 
 /**
@@ -1035,6 +1040,28 @@ export abstract class RenderNodeWithMultiChildren extends RenderNode {
   getChildNextSibling(child: AsukaNode): AsukaNode | null {
     return child.parentData.nextSibling;
   }
+}
+
+export class RenderNodeProxy extends RenderNodeWithSingleChild {
+  sizedByParent: boolean = false;
+  performResize(): void {}
+  performLayout(): void {
+    assert(this._constraints != null);
+    if (isRenderNode(this.child)) {
+      assert(this._widgetFactory != null);
+      let child = this.child as RenderNode;
+      child.layout(this._constraints!, {
+        parentUsesSize: true,
+        widgetFactory: this._widgetFactory!,
+      });
+      this.size = child.size;
+      child.offset = { x: 0, y: 0 };
+    }
+    else {
+      this.size = this._constraints!.smallest
+    }
+  }
+  performCommit(): void {}
 }
 
 /**

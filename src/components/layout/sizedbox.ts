@@ -29,7 +29,7 @@ export class LayoutWidgetSizedBox extends RenderNodeWithSingleChild {
         parentUsesSize: false,
         widgetFactory: this._widgetFactory!,
       });
-      this.size = constraints.maxSize();
+      this.size = constraints.biggest;
       child.offset = {
         x: 0,
         y: 0,
@@ -38,6 +38,7 @@ export class LayoutWidgetSizedBox extends RenderNodeWithSingleChild {
   }
   performCommit(): void {}
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value)
     switch (key) {
       case 'width':
       case 'w':

@@ -84,6 +84,42 @@ export class Constraints {
       constraints.minWidth <= constraints.maxWidth
     );
   }
+  static copy(constraints: Constraints) {
+    return new Constraints({
+      minWidth: constraints.minWidth,
+      maxWidth: constraints.maxWidth,
+      minHeight: constraints.minHeight,
+      maxHeight: constraints.maxHeight,
+    });
+  }
+  copy(): Constraints {
+    return new Constraints({
+      minWidth: this.minWidth,
+      maxWidth: this.maxWidth,
+      minHeight: this.minHeight,
+      maxHeight: this.maxHeight,
+    });
+  }
+  /**
+   * 返回一个新的约束对象，使其在遵守原约束对象的同时尽可能向指定的长宽缩进
+   * @param param0
+   */
+  tighten({ width, height }: { width?: number; height?: number }) {
+    let constraints = this.copy();
+    if (width !== undefined) {
+      if (width > this.minWidth)
+        constraints.minWidth = min(width, this.maxWidth);
+      if (width < this.maxWidth)
+        constraints.maxWidth = max(width, this.minWidth);
+    }
+    if (height !== undefined) {
+      if (height > this.minHeight)
+        constraints.minHeight = min(height, this.maxHeight);
+      if (height < this.maxHeight)
+        constraints.maxHeight = max(height, this.minHeight);
+    }
+    return constraints;
+  }
   /**
    * **约束操作**
    * @description
@@ -142,10 +178,19 @@ export class Constraints {
   /**
    * **返回符合该约束的最大尺寸**
    */
-  maxSize(): Size {
+  get biggest(): Size {
     return {
       w: this.maxWidth,
       h: this.maxHeight,
+    };
+  }
+  /**
+   * **返回符合该约束的最小尺寸**
+   */
+  get smallest(): Size {
+    return {
+      w: this.minWidth,
+      h: this.minHeight,
     };
   }
   /**
@@ -181,6 +226,18 @@ export class Constraints {
       maxHeight: this.maxHeight,
     });
   }
+  /**
+   * **检测一个`Size`对象是否符合本约束要求**
+   * @param size 要检测的`Size`对象
+   */
+  testSize(size: Size): boolean {
+    return (
+      size.h >= this.minHeight &&
+      size.h <= this.maxHeight &&
+      size.w >= this.minWidth &&
+      size.w <= this.maxWidth
+    );
+  }
 }
 
 export class Size {
@@ -198,6 +255,14 @@ export class Size {
       isFinite(size.h) &&
       isFinite(size.w)
     );
+  }
+  /**
+   * **判断一个`Size`对象是不是有穷的**
+   * @param size 要判断的`Size`对象
+   * @returns 是否有穷
+   */
+  static isFinite(size: Size): boolean {
+    return Number.isFinite(size.w) && Number.isFinite(size.h);
   }
   static copy(size: Size) {
     assert(size != null);
@@ -375,8 +440,8 @@ export enum Axis {
 
 /**
  * 翻转轴向（水平变成垂直，垂直变成水平）
- * @param axis 
- * @returns 
+ * @param axis
+ * @returns
  */
 export function flipAxis(axis: Axis) {
   return axis === Axis.horizontal ? Axis.vertical : Axis.horizontal;
@@ -501,4 +566,128 @@ export enum FlexFit {
    * @todo 这个到底是啥意思？
    */
   loose,
+}
+
+/**
+ * **边距**
+ */
+
+export class EdgeInsets {
+  _left: number;
+  _up: number;
+  _right: number;
+  _down: number;
+  constructor({
+    left,
+    up,
+    right,
+    down,
+  }: {
+    left: number;
+    up: number;
+    right: number;
+    down: number;
+  }) {
+    this._left = left;
+    this._up = up;
+    this._right = right;
+    this._down = down;
+  }
+  static all(value: number): EdgeInsets {
+    return new EdgeInsets({
+      left: value,
+      up: value,
+      right: value,
+      down: value,
+    });
+  }
+  static only(value?: {
+    left?: number;
+    up?: number;
+    right?: number;
+    down?: number;
+  }): EdgeInsets {
+    return new EdgeInsets({
+      left: value?.left ?? 0,
+      up: value?.up ?? 0,
+      right: value?.right ?? 0,
+      down: value?.down ?? 0,
+    });
+  }
+  static symmetric({
+    vertical,
+    horizontal,
+  }: {
+    vertical: number;
+    horizontal: number;
+  }): EdgeInsets {
+    return new EdgeInsets({
+      left: horizontal,
+      up: vertical,
+      right: horizontal,
+      down: vertical,
+    });
+  }
+  static get zero() {
+    return EdgeInsets.only();
+  }
+  equals(e: EdgeInsets | null): boolean {
+    if (e == null) return false;
+    return (
+      this._left === e._left &&
+      this._down === e._down &&
+      this._right === e._right &&
+      this._up === e._up
+    );
+  }
+  get horizontalTotal() {
+    return this._left + this._right;
+  }
+  get verticalTotal() {
+    return this._up + this._down;
+  }
+  getInnerConstraints(outterConstraints: Constraints): Constraints {
+    return new Constraints({
+      minWidth: outterConstraints.minWidth - this.verticalTotal,
+      maxWidth: outterConstraints.maxWidth - this.verticalTotal,
+      minHeight: outterConstraints.minHeight - this.horizontalTotal,
+      maxHeight: outterConstraints.maxHeight - this.horizontalTotal,
+    });
+  }
+  /**
+   * **获取仅包含padding占用空间的`Size`对象**
+   */
+  get totalSizeWithoutInner(): Size {
+    return {
+      w: this.horizontalTotal,
+      h: this.verticalTotal,
+    };
+  }
+  getOutterSize(innerSize: Size): Size {
+    return {
+      w: innerSize.w + this.horizontalTotal,
+      h: innerSize.h + this.verticalTotal,
+    };
+  }
+  get innerOffset(): Coordinate {
+    return {
+      x: this._left,
+      y: this._up,
+    };
+  }
+}
+
+export enum StackFit {
+  /**
+   * 将Stack的约束宽松后传给子组件
+   */
+  loose,
+  /**
+   * 将Stack的约束严格化后传给子组件
+   */
+  expand,
+  /**
+   * 将Stack的约束原样传递给子组件
+   */
+  passthrough,
 }

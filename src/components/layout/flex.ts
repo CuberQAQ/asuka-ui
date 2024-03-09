@@ -2,6 +2,7 @@ import { isRenderNode } from '../../core';
 import {
   AsukaNode,
   RenderNode,
+  RenderNodeProxy,
   RenderNodeWithMultiChildren,
   RenderNodeWithSingleChild,
 } from '../../core/base';
@@ -31,7 +32,7 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
   _verticalDirection: VerticalDirection = VerticalDirection.down;
   _textBaseline: TextBaseline | null = null; // not support now
   _overflow: number = 0;
-  sizedByParent: boolean = true;
+  sizedByParent: boolean = false;
   setProperty(key: string, value: any): void {
     switch (key) {
       case 'd':
@@ -113,7 +114,7 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
    */
   performResize(): void {
     assert(this._constraints != null);
-    this.size = this._constraints!.maxSize();
+    this.size = this._constraints!.biggest;
   }
   _getFlex(child: RenderNode): number {
     return child instanceof LayoutWidgetFlexible ? child._flex : 0;
@@ -199,7 +200,7 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
           }
         }
         // layout child
-        child.layout(constraints, {
+        child.layout(innerConstraints, {
           parentUsesSize: true,
           widgetFactory: this._widgetFactory!,
         });
@@ -234,6 +235,7 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
               break;
             case FlexFit.loose:
               minChildExtent = 0;
+              break;
           }
           let innerConstraints: Constraints;
           if (this._crossAxisAlignment === CrossAxisAlignment.stretch) {
@@ -263,15 +265,17 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
                   maxWidth: maxChildExtent,
                   maxHeight: constraints.maxHeight,
                 });
+                break;
               case Axis.vertical:
                 innerConstraints = new Constraints({
                   maxWidth: constraints.maxWidth,
                   minHeight: minChildExtent,
                   maxHeight: maxChildExtent,
                 });
+                break;
             }
           }
-          child.layout(constraints, {
+          child.layout(innerConstraints, {
             parentUsesSize: true,
             widgetFactory: this._widgetFactory!,
           });
@@ -313,10 +317,12 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
         this.size = constraints.constrain({ w: actualSize, h: crossSize });
         actualSize = this.size.w;
         crossSize = this.size.h;
+        break;
       case Axis.vertical:
         this.size = constraints.constrain({ w: crossSize, h: actualSize });
         actualSize = this.size.h;
         crossSize = this.size.w;
+        break;
     }
     const actualSizeDelta: number = actualSize - allocatedSize;
     this._overflow = max(0, -actualSizeDelta);
@@ -335,30 +341,36 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
       case MainAxisAlignment.start:
         leadingSpace = 0.0;
         betweenSpace = 0.0;
+        break;
       case MainAxisAlignment.end:
         leadingSpace = remainingSpace;
         betweenSpace = 0.0;
+        break;
       case MainAxisAlignment.center:
         leadingSpace = remainingSpace / 2.0;
         betweenSpace = 0.0;
+        break;
       case MainAxisAlignment.spaceBetween:
         leadingSpace = 0.0;
         betweenSpace =
           this.childRenderNodeCount > 1
             ? remainingSpace / (this.childRenderNodeCount - 1)
             : 0.0;
+        break;
       case MainAxisAlignment.spaceAround:
         betweenSpace =
           this.childRenderNodeCount > 0
             ? remainingSpace / this.childRenderNodeCount
             : 0.0;
         leadingSpace = betweenSpace / 2.0;
+        break;
       case MainAxisAlignment.spaceEvenly:
         betweenSpace =
           this.childRenderNodeCount > 0
             ? remainingSpace / (this.childRenderNodeCount + 1)
             : 0.0;
         leadingSpace = betweenSpace;
+        break;
     }
 
     // Position elements
@@ -409,8 +421,10 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
       switch (this._direction) {
         case Axis.horizontal:
           child.offset = { x: childMainPosition, y: childCrossPosition };
+          break;
         case Axis.vertical:
           child.offset = { x: childCrossPosition, y: childMainPosition };
+          break;
       }
       if (flipMainAxis) {
         childMainPosition -= betweenSpace;
@@ -422,7 +436,7 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
   performCommit(): void {}
 }
 
-export class LayoutWidgetFlexible extends RenderNodeWithSingleChild {
+export class LayoutWidgetFlexible extends RenderNodeProxy {
   _fit: FlexFit = FlexFit.loose;
   _flex: number = 1;
   onMount(): void {
@@ -435,21 +449,8 @@ export class LayoutWidgetFlexible extends RenderNodeWithSingleChild {
       return true;
     });
   }
-  performResize(): void {}
-  performLayout(): void {
-    assert(isRenderNode(this.child));
-    assert(this._constraints != null);
-    assert(this._widgetFactory != null);
-    let child = this.child as RenderNode;
-    child.layout(this._constraints!, {
-      parentUsesSize: true,
-      widgetFactory: this._widgetFactory!,
-    });
-    this.size = child.size;
-    child.offset = { x: 0, y: 0 };
-  }
-  performCommit(): void {}
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
     switch (key) {
       case 'flex':
         {

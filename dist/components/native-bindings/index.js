@@ -4,9 +4,10 @@ export const NativeBindingsFactory = {
     createNode(type) {
         switch (type) {
             case 'text':
-                return new NativeWidgetText(null, 'text');
+                return new NativeWidgetText(null, type);
             case 'fill-rect':
-                return new NativeWidgetFillRect(null, 'fill-rect');
+            case 'fillrect':
+                return new NativeWidgetFillRect(null, type);
             default:
                 return null;
         }

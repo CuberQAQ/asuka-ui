@@ -7,7 +7,7 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
   _align = Alignment.center;
   performResize(): void {
     assert(this._constraints != null);
-    this.size = this._constraints!.maxSize();
+    this.size = this._constraints!.biggest;
   }
   performLayout(): void {
     assert(this.size != null);
@@ -25,6 +25,7 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
   }
   performCommit(): void {}
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value)
     switch (key) {
       case 'x':
         {
@@ -51,6 +52,7 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
           this.markNeedsLayout();
         }
       }
+      break;
     }
   }
 }

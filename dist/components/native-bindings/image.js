@@ -1,13 +1,14 @@
 import * as hmUI from '@zos/ui';
 import { RenderWidget } from '../../core/base';
-import { Constraints } from '../../core/layout';
 import { assert } from '../../debug/index';
+import { PreferSizeManager } from '../../tools/widget';
 const defaultProps = {};
 export class NativeWidgetImage extends RenderWidget {
     constructor() {
         super(...arguments);
         this._widget = null;
         this._props = Object.assign({}, defaultProps);
+        this._preferredSizeManager = new PreferSizeManager(this);
         this.sizedByParent = false;
     }
     onCommit({ size, position, widgetFactory, initial, }) {
@@ -24,13 +25,8 @@ export class NativeWidgetImage extends RenderWidget {
         assert(widgetFactory !== null && this._widget !== null);
         widgetFactory.deleteWidget(this._widget);
     }
-    performResize() {
-        assert(Constraints.isValid(this._constraints));
-        this.size = this._constraints.maxSize();
-    }
-    performLayout() {
-        // assert(()=>{throw Error("Test Point 2")})
-    }
+    performResize() { }
+    performLayout() { }
     setProperty(key, value) {
         switch (key) {
             case 'radius':

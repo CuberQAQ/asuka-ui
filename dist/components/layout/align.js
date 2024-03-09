@@ -9,7 +9,7 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
     }
     performResize() {
         assert(this._constraints != null);
-        this.size = this._constraints.maxSize();
+        this.size = this._constraints.biggest;
     }
     performLayout() {
         assert(this.size != null);
@@ -27,6 +27,7 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
     }
     performCommit() { }
     setProperty(key, value) {
+        super.setProperty(key, value);
         switch (key) {
             case 'x':
                 {
@@ -46,14 +47,16 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
                     }
                 }
                 break;
-            case 'alignment': {
-                if (!(value instanceof Alignment))
-                    break;
-                if (value._x !== this._align._x || value._y !== this._align._y) {
-                    this._align = Alignment.copy(value);
-                    this.markNeedsLayout();
+            case 'alignment':
+                {
+                    if (!(value instanceof Alignment))
+                        break;
+                    if (value._x !== this._align._x || value._y !== this._align._y) {
+                        this._align = Alignment.copy(value);
+                        this.markNeedsLayout();
+                    }
                 }
-            }
+                break;
         }
     }
 }
