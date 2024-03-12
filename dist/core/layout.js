@@ -286,6 +286,12 @@ export class Size {
             h: size1.h - size2.h,
         };
     }
+    static get infinite() {
+        return {
+            w: Number.POSITIVE_INFINITY,
+            h: Number.POSITIVE_INFINITY,
+        };
+    }
 }
 export class Coordinate {
     static copy(coord) {

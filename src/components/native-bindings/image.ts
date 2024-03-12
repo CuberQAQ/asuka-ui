@@ -60,15 +60,15 @@ export class NativeWidgetImage extends RenderWidget {
           if (this._widget) this._widget.setProperty(hmUI.prop.COLOR, value);
         }
         break;
-      case 'alpha':
-        {
-          if (value !== this._props.alpha) {
-            this._props.alpha = value;
-            if (this._widget)
-              this._widget.setProperty(hmUI.prop.MORE, { ...this._props });
-          }
-        }
-        break;
+      // case 'alpha':
+      //   {
+      //     if (value !== this._props.alpha) {
+      //       this._props.alpha = value;
+      //       if (this._widget)
+      //         this._widget.setProperty(hmUI.prop.MORE, { ...this._props });
+      //     }
+      //   }
+      //   break;
       case 'pos_x':
         {
           if (value !== this._props.pos_x) {

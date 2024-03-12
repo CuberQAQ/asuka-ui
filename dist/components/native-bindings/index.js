@@ -6,6 +6,7 @@ import { NativeWidgetFillRect } from './fill-rect';
 import { NativeWidgetImage } from './image';
 import { NativeWidgetPolyline } from './polyline';
 import { NativeWidgetQRCode } from './qrcode';
+import { NativeWidgetRadioGroup } from './radio_group';
 import { NativeWidgetStrokeRect } from './stroke-rect';
 import { NativeWidgetText } from './text';
 export const NativeBindingsFactory = {
@@ -37,6 +38,10 @@ export const NativeBindingsFactory = {
                 return new NativeWidgetPolyline(null, type);
             case 'canvas':
                 return new NativeWidgetCanvas(null, type);
+            case 'radio':
+            case 'radio_group':
+            case 'radiogroup':
+                return new NativeWidgetRadioGroup(null, type);
             default:
                 return null;
         }

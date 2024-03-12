@@ -132,6 +132,7 @@ export declare class Size {
      * @returns 累加后的新对象
      */
     static remove(size1: Size, size2: Size): Size;
+    static get infinite(): Size;
 }
 export interface Size {
     w: number;

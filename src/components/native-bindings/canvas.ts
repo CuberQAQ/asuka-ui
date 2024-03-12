@@ -9,9 +9,9 @@ type HmWidget = any;
 const defaultProps = {};
 export class NativeWidgetCanvas extends RenderWidget {
   _widget: HmWidget | null = null;
-  _preferredSizeManager = new PreferSizeManager(this);
+  // _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
-  sizedByParent: boolean = false;
+  sizedByParent: boolean = true;
   onCommit({
     size,
     position,
@@ -48,11 +48,11 @@ export class NativeWidgetCanvas extends RenderWidget {
     this.size = this._constraints!.biggest;
   }
   performLayout(): void {
-    this._preferredSizeManager.chooseSize();
+    // this._preferredSizeManager.chooseSize();
     // assert(()=>{throw Error("Test Point 2")})
   }
   setProperty(key: string, value: any): void {
-    this._preferredSizeManager.setProperty(key, value);
+    // this._preferredSizeManager.setProperty(key, value);
     switch (key) {
     }
   }

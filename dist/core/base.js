@@ -389,8 +389,9 @@ export class RenderNode extends AsukaNode {
     detach() {
         assert(this._attached);
         this._attached = false;
-        this.onDetach();
         this.visitChildren((child) => child.detach());
+        // 为了让子组件deleteWidget时可能存在的父组件的widgetFactory还在，所以先visitChildren，再调用`onDetach`
+        this.onDetach();
         // 注：没必要判断了。因为_core._layout可以判断你有没有_attached。就算你被移动改变了深度，排序也是_layout里面排的
         // // 如果该节点可能注册了重布局节点
         // if(this._relayoutBoundary === this && this._needsLayout) {
@@ -1077,6 +1078,56 @@ export class RenderWidget extends RenderNodeWithNoChild {
         this._displaying = true;
     }
 }
+/**
+ *
+ */
+export class RenderWidgetFactoryProvider extends RenderNodeWithSingleChild {
+    constructor() {
+        super(...arguments);
+        this._displaying = false;
+        this.sizedByParent = false;
+        this.childWidgetFactory = null;
+    }
+    onAttach() {
+        this.markMustCommit();
+    }
+    onDetach() {
+        this._displaying = false;
+        assert(this._widgetFactory !== null);
+        this.onDestroy(this._widgetFactory);
+    }
+    performResize() { }
+    /// 行为类似`RenderNodeProxy`，只不过替换了传给子控件的`widgetFactory`
+    performLayout() {
+        assert(this._constraints != null);
+        if (isRenderNode(this.child)) {
+            assert(this._widgetFactory != null);
+            assert(this.childWidgetFactory != null);
+            let child = this.child;
+            child.layout(this._constraints, {
+                parentUsesSize: true,
+                widgetFactory: this.childWidgetFactory,
+            });
+            this.size = child.size;
+            child.offset = { x: 0, y: 0 };
+        }
+        else {
+            this.size = this._constraints.smallest;
+        }
+    }
+    performCommit() {
+        assert(this.size !== null &&
+            this.position !== null &&
+            this._widgetFactory !== null);
+        this.onCommit({
+            size: this.size,
+            position: this.position,
+            initial: !this._displaying,
+            widgetFactory: this._widgetFactory,
+        });
+        this._displaying = true;
+    }
+}
 export class AsukaUI {
     constructor() {
         this.viewRecord = {};
@@ -1086,6 +1137,8 @@ export class AsukaUI {
         this._nodesNeedsLayout = [];
         /** 需要重新放置的节点 */
         this._nodesNeedsPlace = [];
+        /** 在布局和放置任务完成后调用的任务 */
+        this._runAfterTasks = [];
         /** 异步管理器句柄(可能是setTimeout或者Promise之类的) */
         this._asyncHandler = null;
         assert(AsukaUI.instance === null);
@@ -1211,6 +1264,15 @@ export class AsukaUI {
         }
     }
     /**
+     * **添加布局与放置后的任务**
+     *
+     * 将在`layout`和`place`完成后调用，并清空任务队列
+     * @param task 要执行的任务
+     */
+    addRunAfterAsync(task) {
+        this._runAfterTasks.push(task);
+    }
+    /**
      * 重新布局时调用的
      */
     _layoutAndPlace() {
@@ -1218,6 +1280,7 @@ export class AsukaUI {
         this._asyncHandler = null;
         this._layout();
         this._place();
+        this._runAfter();
     }
     _layout() {
         // TODO 检查
@@ -1237,6 +1300,12 @@ export class AsukaUI {
                 node.place();
         }
         this._nodesNeedsPlace = [];
+    }
+    _runAfter() {
+        for (let task of this._runAfterTasks) {
+            task();
+        }
+        this._runAfterTasks = [];
     }
 }
 AsukaUI.instance = null;

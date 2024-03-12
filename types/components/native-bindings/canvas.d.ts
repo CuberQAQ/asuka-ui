@@ -1,10 +1,8 @@
 import { RenderWidget, WidgetFactory } from '../../core/base';
 import { Size, Coordinate } from '../../core/layout';
-import { PreferSizeManager } from '../../tools/widget';
 type HmWidget = any;
 export declare class NativeWidgetCanvas extends RenderWidget {
     _widget: HmWidget | null;
-    _preferredSizeManager: PreferSizeManager;
     _props: Record<string, any>;
     sizedByParent: boolean;
     onCommit({ size, position, widgetFactory, initial, }: {

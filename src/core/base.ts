@@ -297,8 +297,9 @@ export abstract class RenderNode extends AsukaNode {
   detach(): void {
     assert(this._attached);
     this._attached = false;
-    this.onDetach();
     this.visitChildren((child) => child.detach());
+    // 为了让子组件deleteWidget时可能存在的父组件的widgetFactory还在，所以先visitChildren，再调用`onDetach`
+    this.onDetach();
     // 注：没必要判断了。因为_core._layout可以判断你有没有_attached。就算你被移动改变了深度，排序也是_layout里面排的
     // // 如果该节点可能注册了重布局节点
     // if(this._relayoutBoundary === this && this._needsLayout) {
@@ -1056,9 +1057,8 @@ export class RenderNodeProxy extends RenderNodeWithSingleChild {
       });
       this.size = child.size;
       child.offset = { x: 0, y: 0 };
-    }
-    else {
-      this.size = this._constraints!.smallest
+    } else {
+      this.size = this._constraints!.smallest;
     }
   }
   performCommit(): void {}
@@ -1287,6 +1287,82 @@ export abstract class RenderWidget extends RenderNodeWithNoChild {
   }
 }
 
+/**
+ *
+ */
+export abstract class RenderWidgetFactoryProvider extends RenderNodeWithSingleChild {
+  protected _displaying = false;
+  sizedByParent: boolean = false;
+  childWidgetFactory: WidgetFactory | null = null;
+  /**
+   * **创建组件或更新布局**
+   * @description
+   * 当布局更新或者初始化时调用。不应在此方法内修改已有属性，即使为初始化时（因为有可能再次调用`onCommit`）
+   *
+   * **在初始化时应设置`childWidgetFactory`，其它时候不应改变
+   * @param layout 布局信息
+   * @param initial 是否为初始化
+   * @param widgetFactory 控件工厂（仅应在onCommit调用开始到onDestory调用期间使用，因为其他时候可能发生改变）
+   */
+  abstract onCommit({
+    size,
+    position,
+    widgetFactory,
+    initial,
+  }: {
+    size: Size;
+    position: Coordinate;
+    widgetFactory: WidgetFactory;
+    initial?: boolean;
+  }): void;
+  /**
+   * **删除组件**
+   * @description
+   * 当控件被移出可渲染树时调用。不应在此方法内修改已有属性，即使为初始化时（因为有可能再次调用`onCommit`）
+   */
+  abstract onDestroy(widgetFactory: WidgetFactory): void;
+  onAttach(): void {
+    this.markMustCommit();
+  }
+  onDetach(): void {
+    this._displaying = false;
+    assert(this._widgetFactory !== null);
+    this.onDestroy(this._widgetFactory!);
+  }
+  performResize(): void {}
+  /// 行为类似`RenderNodeProxy`，只不过替换了传给子控件的`widgetFactory`
+  performLayout(): void {
+    assert(this._constraints != null);
+    if (isRenderNode(this.child)) {
+      assert(this._widgetFactory != null);
+      assert(this.childWidgetFactory != null);
+      let child = this.child as RenderNode;
+      child.layout(this._constraints!, {
+        parentUsesSize: true,
+        widgetFactory: this.childWidgetFactory!,
+      });
+      this.size = child.size;
+      child.offset = { x: 0, y: 0 };
+    } else {
+      this.size = this._constraints!.smallest;
+    }
+  }
+  performCommit(): void {
+    assert(
+      this.size !== null &&
+        this.position !== null &&
+        this._widgetFactory !== null,
+    );
+    this.onCommit({
+      size: this.size!,
+      position: this.position!,
+      initial: !this._displaying,
+      widgetFactory: this._widgetFactory!,
+    });
+    this._displaying = true;
+  }
+}
+
 export interface WidgetFactory {
   createWidget(widgetType: number, option: Record<string, any>): any;
   deleteWidget(widget: any): void;
@@ -1372,6 +1448,8 @@ export class AsukaUI {
   _nodesNeedsLayout: RenderNode[] = [];
   /** 需要重新放置的节点 */
   _nodesNeedsPlace: RenderNode[] = [];
+  /** 在布局和放置任务完成后调用的任务 */
+  _runAfterTasks: (() => any)[] = [];
   /** 异步管理器句柄(可能是setTimeout或者Promise之类的) */
   _asyncHandler: number | null = null;
   /**
@@ -1429,6 +1507,15 @@ export class AsukaUI {
     }
   }
   /**
+   * **添加布局与放置后的任务**
+   *
+   * 将在`layout`和`place`完成后调用，并清空任务队列
+   * @param task 要执行的任务
+   */
+  addRunAfterAsync(task: () => any) {
+    this._runAfterTasks.push(task);
+  }
+  /**
    * 重新布局时调用的
    */
   _layoutAndPlace() {
@@ -1436,6 +1523,7 @@ export class AsukaUI {
     this._asyncHandler = null;
     this._layout();
     this._place();
+    this._runAfter();
   }
   _layout() {
     // TODO 检查
@@ -1454,5 +1542,11 @@ export class AsukaUI {
       if (node._needsPlace && node._attached) node.place();
     }
     this._nodesNeedsPlace = [];
+  }
+  _runAfter() {
+    for (let task of this._runAfterTasks) {
+      task();
+    }
+    this._runAfterTasks = [];
   }
 }

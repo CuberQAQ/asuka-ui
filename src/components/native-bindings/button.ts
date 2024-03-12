@@ -9,7 +9,9 @@ type HmWidget = any;
 const defaultProps = {};
 export class NativeWidgetButton extends RenderWidget {
   _widget: HmWidget | null = null;
-  _preferredSizeManager = new PreferSizeManager(this);
+  _preferredSizeManager = new PreferSizeManager(this).setDefaultSize(
+    Size.infinite,
+  );
   _props: Record<string, any> = { ...defaultProps };
   onCommit({
     size,

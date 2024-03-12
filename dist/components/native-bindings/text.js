@@ -15,7 +15,7 @@ export class NativeWidgetText extends RenderWidget {
         super(...arguments);
         this._widget = null;
         this._props = Object.assign({}, defaultProps);
-        this.sizedByParent = true;
+        this.sizedByParent = false;
     }
     onCommit({ size, position, widgetFactory, initial, }) {
         if (initial) {
@@ -32,6 +32,8 @@ export class NativeWidgetText extends RenderWidget {
         widgetFactory.deleteWidget(this._widget);
     }
     performResize() {
+    }
+    performLayout() {
         assert(Constraints.isValid(this._constraints));
         let { width: singleLineWidth, height: singleLineHeight } = hmUI.getTextLayout(this._props.text, {
             text_size: this._props.text_size,
@@ -67,7 +69,6 @@ export class NativeWidgetText extends RenderWidget {
         }
         // this.size = this._constraints!.maxSize();
     }
-    performLayout() { }
     setProperty(key, value) {
         switch (key) {
             case 'text':

@@ -668,6 +668,41 @@ export declare abstract class RenderWidget extends RenderNodeWithNoChild {
     abstract performLayout(): void;
     performCommit(): void;
 }
+/**
+ *
+ */
+export declare abstract class RenderWidgetFactoryProvider extends RenderNodeWithSingleChild {
+    protected _displaying: boolean;
+    sizedByParent: boolean;
+    childWidgetFactory: WidgetFactory | null;
+    /**
+     * **创建组件或更新布局**
+     * @description
+     * 当布局更新或者初始化时调用。不应在此方法内修改已有属性，即使为初始化时（因为有可能再次调用`onCommit`）
+     *
+     * **在初始化时应设置`childWidgetFactory`，其它时候不应改变
+     * @param layout 布局信息
+     * @param initial 是否为初始化
+     * @param widgetFactory 控件工厂（仅应在onCommit调用开始到onDestory调用期间使用，因为其他时候可能发生改变）
+     */
+    abstract onCommit({ size, position, widgetFactory, initial, }: {
+        size: Size;
+        position: Coordinate;
+        widgetFactory: WidgetFactory;
+        initial?: boolean;
+    }): void;
+    /**
+     * **删除组件**
+     * @description
+     * 当控件被移出可渲染树时调用。不应在此方法内修改已有属性，即使为初始化时（因为有可能再次调用`onCommit`）
+     */
+    abstract onDestroy(widgetFactory: WidgetFactory): void;
+    onAttach(): void;
+    onDetach(): void;
+    performResize(): void;
+    performLayout(): void;
+    performCommit(): void;
+}
 export interface WidgetFactory {
     createWidget(widgetType: number, option: Record<string, any>): any;
     deleteWidget(widget: any): void;
@@ -695,6 +730,8 @@ export declare class AsukaUI {
     _nodesNeedsLayout: RenderNode[];
     /** 需要重新放置的节点 */
     _nodesNeedsPlace: RenderNode[];
+    /** 在布局和放置任务完成后调用的任务 */
+    _runAfterTasks: (() => any)[];
     /** 异步管理器句柄(可能是setTimeout或者Promise之类的) */
     _asyncHandler: number | null;
     /**
@@ -727,10 +764,18 @@ export declare class AsukaUI {
     cancelRelayout(): void;
     refreshSync(): void;
     /**
+     * **添加布局与放置后的任务**
+     *
+     * 将在`layout`和`place`完成后调用，并清空任务队列
+     * @param task 要执行的任务
+     */
+    addRunAfterAsync(task: () => any): void;
+    /**
      * 重新布局时调用的
      */
     _layoutAndPlace(): void;
     _layout(): void;
     _place(): void;
+    _runAfter(): void;
 }
 //# sourceMappingURL=base.d.ts.map

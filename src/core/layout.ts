@@ -300,6 +300,12 @@ export class Size {
       h: size1.h - size2.h,
     };
   }
+  static get infinite(): Size {
+    return {
+      w: Number.POSITIVE_INFINITY,
+      h: Number.POSITIVE_INFINITY,
+    };
+  }
 }
 
 export interface Size {
