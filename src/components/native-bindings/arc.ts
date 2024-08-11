@@ -94,3 +94,17 @@ export class NativeWidgetArc extends RenderWidget {
     }
   }
 }
+
+export declare interface NativeWidgetArcAttributes {
+  color?: number,
+  s?: number,
+  sa?: number,
+  start?: number,
+  start_angle?: number,
+  e?: number,
+  ea?: number,
+  end?: number,
+  end_angle?: number,
+  lw?: number,
+  line_width?: number,
+}

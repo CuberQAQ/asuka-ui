@@ -34,3 +34,9 @@ export class LayoutWidgetVStack extends RenderNodeWithMultiChildren {
   }
   performCommit(): void {}
 }
+
+export declare namespace LayoutWidgetVStack {
+  export interface Attributes {
+
+  }
+}

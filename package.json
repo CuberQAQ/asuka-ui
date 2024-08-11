@@ -1,13 +1,13 @@
 {
   "name": "@cuberqaq/asuka-ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "UI Framework for Zepp OS",
-  "repository": "https://www.github.com/CuberQAQ/AsukaUI",
+  "repository": "https://github.com/CuberQAQ/asuka-ui",
   "author": "CuberQAQ",
   "license": "MIT",
-  "main": "./dist",
+  "main": "./dist/index.js",
   "type": "module",
-  "types": "./types",
+  "types": "./src/index.ts",
   "files": [
     "./dist",
     "./src",

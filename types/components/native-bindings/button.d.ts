@@ -1,6 +1,6 @@
 import { RenderWidget, WidgetFactory } from '../../core/base';
 import { Size, Coordinate } from '../../core/layout';
-import { PreferSizeManager } from '../../tools/widget';
+import { PreferSizeAttributesMixin, PreferSizeManager } from '../../tools/widget';
 type HmWidget = any;
 export declare class NativeWidgetButton extends RenderWidget {
     _widget: HmWidget | null;
@@ -17,6 +17,27 @@ export declare class NativeWidgetButton extends RenderWidget {
     performLayout(): void;
     _updateDefaultSize(): void;
     setProperty(key: string, value: any): void;
+}
+export declare interface NativeWidgetButtonAttributes extends PreferSizeAttributesMixin {
+    text?: string;
+    color?: number;
+    size?: number;
+    ts?: number;
+    text_size?: number;
+    nc?: number;
+    ncolor?: number;
+    normal_color?: number;
+    pc?: number;
+    pcolor?: number;
+    press_color?: number;
+    r?: number;
+    radius?: number;
+    ns?: string;
+    nsrc?: string;
+    normal_src?: string;
+    ps?: string;
+    psrc?: string;
+    press_src?: string;
 }
 export {};
 //# sourceMappingURL=button.d.ts.map

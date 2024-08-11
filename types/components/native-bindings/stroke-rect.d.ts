@@ -18,5 +18,13 @@ export declare class NativeWidgetStrokeRect extends RenderWidget {
     performLayout(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface NativeWidgetStrokeRectAttributes {
+    r?: number;
+    radius?: number;
+    color?: number;
+    lw?: number;
+    line_width?: number;
+    angle?: number;
+}
 export {};
 //# sourceMappingURL=stroke-rect.d.ts.map

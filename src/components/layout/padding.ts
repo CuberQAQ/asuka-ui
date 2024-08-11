@@ -20,7 +20,14 @@ export class LayoutWidgetPadding extends RenderNodeWithSingleChild {
       });
       assert(child.size != null);
       let size = this._padding.getOutterSize(child.size!);
-      assert(this._constraints!.testSize(size));
+      assert(() => {
+        if (!this._constraints!.testSize(size)) {
+          throw new Error(
+            `Padding out of bounds, size=${JSON.stringify(size)} constraints=${this._constraints?.toString()}`,
+          );
+        }
+        return true;
+      });
       this.size = size;
       child.offset = this._padding.innerOffset;
     } else {
@@ -31,7 +38,7 @@ export class LayoutWidgetPadding extends RenderNodeWithSingleChild {
   }
   performCommit(): void {}
   setProperty(key: string, value: unknown): void {
-    super.setProperty(key, value)
+    super.setProperty(key, value);
     switch (key) {
       case 'p':
       case 'padding':
@@ -47,5 +54,12 @@ export class LayoutWidgetPadding extends RenderNodeWithSingleChild {
         }
         break;
     }
+  }
+}
+
+export declare namespace LayoutWidgetPadding {
+  export interface Attributes extends RenderNodeWithSingleChild.Attributes {
+    p?: EdgeInsets;
+    padding?: EdgeInsets;
   }
 }

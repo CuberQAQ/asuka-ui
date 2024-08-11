@@ -18,5 +18,18 @@ export declare class NativeWidgetArc extends RenderWidget {
     performLayout(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface NativeWidgetArcAttributes {
+    color?: number;
+    s?: number;
+    sa?: number;
+    start?: number;
+    start_angle?: number;
+    e?: number;
+    ea?: number;
+    end?: number;
+    end_angle?: number;
+    lw?: number;
+    line_width?: number;
+}
 export {};
 //# sourceMappingURL=arc.d.ts.map

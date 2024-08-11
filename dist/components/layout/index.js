@@ -1,7 +1,9 @@
 import { LayoutWidgetAlign } from './align';
 import { LayoutWidgetCenter } from './center';
 import { LayoutWidgetColumn } from './column';
-import { LayoutWidgetExpanded, LayoutWidgetFlex, LayoutWidgetFlexible, LayoutWidgetSpacer, } from './flex';
+import { LayoutWidgetExpanded, LayoutWidgetFlex, LayoutWidgetFlexible,
+// LayoutWidgetSpacer,
+ } from './flex';
 import { LayoutWidgetHStack } from './hstack';
 import { LayoutWidgetPadding } from './padding';
 import { LayoutWidgetRow } from './row';
@@ -19,6 +21,8 @@ export const LayoutManagerFactory = {
                 return new LayoutWidgetCenter(null, type);
             case 'sizedbox':
             case 'sized-box':
+            case 'space':
+            case 'spacer':
                 return new LayoutWidgetSizedBox(null, type);
             case 'align':
                 return new LayoutWidgetAlign(null, type);
@@ -28,8 +32,8 @@ export const LayoutManagerFactory = {
                 return new LayoutWidgetFlexible(null, type);
             case 'expanded':
                 return new LayoutWidgetExpanded(null, type);
-            case 'spacer':
-                return new LayoutWidgetSpacer(null, type);
+            // case 'spacer':
+            // return new LayoutWidgetSpacer(null, type);
             case 'row':
                 return new LayoutWidgetRow(null, type);
             case 'column':

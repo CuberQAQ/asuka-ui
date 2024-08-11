@@ -1,6 +1,6 @@
-import { RenderNodeWithMultiChildren } from '../../core/base';
-import { Constraints } from '../../core/layout';
-import { assert } from '../../debug/index';
+import { RenderNodeWithMultiChildren } from '../../core/base.js';
+import { Constraints } from '../../core/layout.js';
+import { assert } from '../../debug/index.js';
 
 export class LayoutWidgetHStack extends RenderNodeWithMultiChildren {
   sizedByParent: boolean = true;
@@ -33,4 +33,10 @@ export class LayoutWidgetHStack extends RenderNodeWithMultiChildren {
     })
   }
   performCommit(): void {}
+}
+
+export declare namespace LayoutWidgetHStack {
+  export interface Attributes {
+
+  }
 }

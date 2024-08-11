@@ -23,5 +23,11 @@ export declare class NativeWidgetCircle extends RenderWidget {
     performLayout(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface NativeWidgetCircleAttributes {
+    r?: number;
+    radius?: number;
+    color?: number;
+    alpha?: number;
+}
 export {};
 //# sourceMappingURL=circle.d.ts.map

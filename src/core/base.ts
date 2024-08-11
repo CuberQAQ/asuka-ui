@@ -3,11 +3,11 @@
 // import { splice, findWhere, createAttributeFilter, isElement } from "./util";
 
 import { getDeviceInfo } from '@zos/device';
-import { assert, reportError } from '../debug/index';
-import { objectTag } from '../decorator/debug';
-import { Constraints, Coordinate, Size } from './layout';
-import { NodeType, isRenderNode } from './constants';
-import { findWhere, splice } from './utils';
+import { assert, reportError } from '../debug/index.js';
+import { objectTag } from '../decorator/debug.js';
+import { Constraints, Coordinate, Size } from './layout.js';
+import { NodeType, isRenderNode } from './constants.js';
+import { findWhere, splice } from './utils.js';
 import * as hmUI from '@zos/ui';
 
 /**
@@ -92,6 +92,12 @@ export abstract class AsukaNode {
    */
   setProperty(key: string, value: any) {}
 
+  setProperties(props: { [key: string]: any }) {
+    for (const key in props) {
+      this.setProperty(key, props[key]);
+    }
+  }
+
   /**------------------DEBUG------------------- */
 }
 
@@ -170,7 +176,11 @@ export abstract class RenderNode extends AsukaNode {
    * @param type 事件类型，不区分大小写
    * @param handler 事件处理函数
    */
-  addEventListener(type: string, handler: (event: AsukaEvent) => void) {
+  addEventListener(
+    type: string,
+    handler: (this: RenderNode, event: AsukaEvent) => void,
+  ) {
+    type = type.toLowerCase();
     (this._handlers[type] || (this._handlers[type] = [])).push(handler);
   }
   /**
@@ -179,6 +189,7 @@ export abstract class RenderNode extends AsukaNode {
    * @param handler 事件处理函数
    */
   removeEventListener(type: string, handler: (event: AsukaEvent) => void) {
+    type = type.toLowerCase()
     splice(this._handlers[type], handler, undefined, true);
   }
   /**
@@ -207,6 +218,13 @@ export abstract class RenderNode extends AsukaNode {
       (target = target.parentNode as RenderNode)
     );
     return handlers != null;
+  }
+
+  setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
+    if(key.startsWith('on')) {
+      this.addEventListener(key.slice(2), value);
+    }
   }
 
   /**------------------挂载操作------------------- */
@@ -470,7 +488,12 @@ export abstract class RenderNode extends AsukaNode {
    * 会拷贝一个新对象，不会直接使用传参的对象，调用者可以继续修改使用传递的`Size`对象
    */
   set size(size: Size | null) {
-    assert(Size.isValid(size));
+    assert(() => {
+      if(!Size.isValid(size)) {
+        throw new Error(`Invalid size: ${JSON.stringify(size)}, at ${this.nodeName}, constraint: ${JSON.stringify(this._constraints)}`);
+      }
+      return true
+    });
     assert(size != null);
     if (!Size.equals(size, this._size)) {
       this.markNeedsPlace();
@@ -968,9 +991,16 @@ export abstract class RenderNodeWithSingleChild extends RenderNode {
     return null;
   }
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
     if (key === 'child' && value instanceof AsukaNode) {
       this.child = value;
     }
+  }
+}
+
+export declare namespace RenderNodeWithSingleChild {
+  export interface Attributes {
+    child?: AsukaNode;
   }
 }
 
@@ -1064,6 +1094,11 @@ export class RenderNodeProxy extends RenderNodeWithSingleChild {
   performCommit(): void {}
 }
 
+export declare namespace RenderNodeProxy {
+  export interface Attributes extends RenderNodeWithSingleChild.Attributes {
+  }
+}
+
 /**
  * **事件类**
  * @description
@@ -1096,7 +1131,7 @@ export class AsukaEvent {
       cancelable: boolean; // 是否可取消
     },
   ) {
-    this.type = type;
+    this.type = type.toLowerCase();
     this.bubbles = !!(opts && opts.bubbles);
     this.cancelable = !!(opts && opts.cancelable);
   }
@@ -1470,7 +1505,9 @@ export class AsukaUI {
    */
   requestRelayout() {
     if (this._asyncHandler === null) {
-      this._asyncHandler = setTimeout(() => this._layoutAndPlace());
+      this._asyncHandler = setTimeout(() =>
+        this._layoutAndPlace(),
+      ) as unknown as number;
     }
   }
   /**
@@ -1491,7 +1528,9 @@ export class AsukaUI {
    */
   requestPlace() {
     if (this._asyncHandler === null) {
-      this._asyncHandler = setTimeout(() => this._layoutAndPlace());
+      this._asyncHandler = setTimeout(() =>
+        this._layoutAndPlace(),
+      ) as unknown as number;
     }
   }
   /**

@@ -52,6 +52,7 @@ export class NativeWidgetImage extends RenderWidget {
     }
   }
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
       case 'color':
@@ -152,4 +153,17 @@ export class NativeWidgetImage extends RenderWidget {
         break;
     }
   }
+}
+
+export declare interface NativeWidgetImageAttributes {
+  color: string;
+  alpha: number;
+  pos_x: number;
+  pos_y: number;
+  angle: number;
+  center_x: number;
+  center_y: number;
+  auto_scale: boolean;
+  auto_scale_obj_fit: string;
+  src: string;
 }

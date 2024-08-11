@@ -9,4 +9,12 @@ export declare class LayoutWidgetSizedBox extends RenderNodeWithSingleChild {
     performCommit(): void;
     setProperty(key: string, value: any): void;
 }
+export declare namespace LayoutWidgetSizedBox {
+    interface Attributes extends RenderNodeWithSingleChild.Attributes {
+        w?: number | null;
+        width?: number | null;
+        h?: number | null;
+        height?: number | null;
+    }
+}
 //# sourceMappingURL=sizedbox.d.ts.map

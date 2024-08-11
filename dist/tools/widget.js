@@ -39,19 +39,21 @@ export class PreferSizeManager {
     setProperty(key, value) {
         switch (key) {
             case 'w':
-            case 'width': {
-                let val = Number(value);
-                if (!isNaN(val)) {
-                    val = max(val, 0);
-                    if (this._preferredSize === null || this._preferredSize.w !== val) {
-                        if (this._preferredSize === null) {
-                            this._preferredSize = { w: null, h: null };
+            case 'width':
+                {
+                    let val = Number(value);
+                    if (!isNaN(val)) {
+                        val = max(val, 0);
+                        if (this._preferredSize === null || this._preferredSize.w !== val) {
+                            if (this._preferredSize === null) {
+                                this._preferredSize = { w: null, h: null };
+                            }
+                            this._preferredSize.w = val;
+                            this._node.markNeedsLayout();
                         }
-                        this._preferredSize.w = val;
-                        this._node.markNeedsLayout();
                     }
                 }
-            }
+                break;
             case 'h':
             case 'height':
                 {

@@ -1,6 +1,6 @@
-import { isRenderNode } from '../../core';
-import { RenderNodeWithSingleChild, } from '../../core/base';
-import { assert } from '../../debug/index';
+import { isRenderNode } from '../../core/index.js';
+import { RenderNodeWithSingleChild } from '../../core/base.js';
+import { assert } from '../../debug/index.js';
 export class LayoutWidgetCenter extends RenderNodeWithSingleChild {
     constructor() {
         super(...arguments);

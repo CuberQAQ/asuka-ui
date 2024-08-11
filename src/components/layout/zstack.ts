@@ -166,6 +166,15 @@ export class LayoutWidgetZStack extends RenderNodeWithMultiChildren {
   }
 }
 
+export declare namespace LayoutWidgetZStack {
+  export interface Attributes {
+    ali?: Alignment;
+    align?: Alignment;
+    alignment?: Alignment;
+    fit?: boolean;
+  }
+}
+
 export class LayoutWidgetPositioned extends RenderNodeProxy {
   _left: number | null = null;
   _right: number | null = null;
@@ -235,5 +244,25 @@ export class LayoutWidgetPositioned extends RenderNodeProxy {
         }
         break;
     }
+  }
+}
+
+export declare namespace LayoutWidgetPositioned {
+  export interface Attributes extends RenderNodeProxy.Attributes {
+    l?: number;
+    x?: number;
+    left?: number;
+    r?: number;
+    right?: number;
+    t?: number;
+    y?: number;
+    top?: number;
+    up?: number;
+    b?: number;
+    bottom?: number;
+    w?: number;
+    width?: number;
+    h?: number;
+    height?: number;
   }
 }

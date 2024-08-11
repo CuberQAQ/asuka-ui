@@ -1,12 +1,14 @@
 import * as hmUI from '@zos/ui';
-import { RenderWidget, WidgetFactory } from '../../core/base';
+import { AsukaEvent, RenderWidget, WidgetFactory } from '../../core/base';
 import { Size, Coordinate, Constraints } from '../../core/layout';
 import { assert } from '../../debug/index';
 import { px } from '@zos/utils';
-import { PreferSizeManager } from '../../tools/widget';
+import { PreferSizeAttributesMixin, PreferSizeManager } from '../../tools/widget';
 
 type HmWidget = any;
-const defaultProps = {};
+const defaultProps = {
+  text_size: px(36),
+};
 export class NativeWidgetButton extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this).setDefaultSize(
@@ -30,6 +32,14 @@ export class NativeWidgetButton extends RenderWidget {
         ...this._props,
         ...position,
         ...size,
+        click_func: () => {
+          this.dispatchEvent(
+            new AsukaEvent('click', {
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
+        },
       });
     } else {
       assert(this._widget != null);
@@ -61,7 +71,9 @@ export class NativeWidgetButton extends RenderWidget {
     }
   }
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
+    console.log(`set ${key} to ${value}`);
     switch (key) {
       case 'text':
         {
@@ -121,43 +133,49 @@ export class NativeWidgetButton extends RenderWidget {
         break;
       case 'pc':
       case 'pcolor':
-      case 'press_color': {
-        if (this._props.press_color !== value) {
-          this._props.press_color = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              press_color: value,
-            });
+      case 'press_color':
+        {
+          if (this._props.press_color !== value) {
+            this._props.press_color = value;
+            if (this._widget)
+              this._widget.setProperty(hmUI.prop.MORE, {
+                ...this.size,
+                ...this.position,
+                press_color: value,
+              });
+          }
         }
-      }
+        break;
       case 'r':
-      case 'radius': {
-        if (this._props.radius !== value) {
-          this._props.radius = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              radius: value,
-            });
+      case 'radius':
+        {
+          if (this._props.radius !== value) {
+            this._props.radius = value;
+            if (this._widget)
+              this._widget.setProperty(hmUI.prop.MORE, {
+                ...this.size,
+                ...this.position,
+                radius: value,
+              });
+          }
         }
-      }
+        break;
       case 'ns':
       case 'nsrc':
-      case 'normal_src': {
-        if (this._props.normal_src !== value) {
-          this._props.normal_src = value;
-          this._updateDefaultSize();
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              normal_src: value,
-            });
+      case 'normal_src':
+        {
+          if (this._props.normal_src !== value) {
+            this._props.normal_src = value;
+            this._updateDefaultSize();
+            if (this._widget)
+              this._widget.setProperty(hmUI.prop.MORE, {
+                ...this.size,
+                ...this.position,
+                normal_src: value,
+              });
+          }
         }
-      }
+        break;
       case 'ps':
       case 'psrc':
       case 'press_src':
@@ -175,4 +193,26 @@ export class NativeWidgetButton extends RenderWidget {
         break;
     }
   }
+}
+
+export declare interface NativeWidgetButtonAttributes extends PreferSizeAttributesMixin {
+  text?: string;
+  color?: number;
+  size?: number;
+  ts?: number;
+  text_size?: number;
+  nc?: number;
+  ncolor?: number;
+  normal_color?: number;
+  pc?: number;
+  pcolor?: number;
+  press_color?: number;
+  r?: number;
+  radius?: number;
+  ns?: string;
+  nsrc?: string;
+  normal_src?: string;
+  ps?: string;
+  psrc?: string;
+  press_src?: string;
 }

@@ -20,5 +20,11 @@ export declare class PreferSizeManager {
     chooseSize(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface PreferSizeAttributesMixin {
+    w?: number | null;
+    h?: number | null;
+    width?: number | null;
+    height?: number | null;
+}
 export {};
 //# sourceMappingURL=widget.d.ts.map

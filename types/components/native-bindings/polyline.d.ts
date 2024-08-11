@@ -18,5 +18,11 @@ export declare class NativeWidgetPolyline extends RenderWidget {
     performLayout(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface NativeWidgetPolylineAttributes {
+    color?: string;
+    line_color?: string;
+    lw?: number;
+    line_width?: number;
+}
 export {};
 //# sourceMappingURL=polyline.d.ts.map

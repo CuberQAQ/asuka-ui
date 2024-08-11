@@ -1,15 +1,15 @@
 import { NodeFactory } from '../../core/base';
-import { NativeWidgetArc } from './arc';
-import { NativeWidgetButton } from './button';
-import { NativeWidgetCanvas } from './canvas';
-import { NativeWidgetCircle } from './circle';
-import { NativeWidgetFillRect } from './fill-rect';
-import { NativeWidgetImage } from './image';
-import { NativeWidgetPolyline } from './polyline';
-import { NativeWidgetQRCode } from './qrcode';
-import { NativeWidgetRadioGroup } from './radio_group';
-import { NativeWidgetStrokeRect } from './stroke-rect';
-import { NativeWidgetText } from './text';
+import { NativeWidgetArc, NativeWidgetArcAttributes } from './arc';
+import { NativeWidgetButton, NativeWidgetButtonAttributes } from './button';
+import { NativeWidgetCanvas, NativeWidgetCanvasAttributes } from './canvas';
+import { NativeWidgetCircle, NativeWidgetCircleAttributes } from './circle';
+import { NativeWidgetFillRect, NativeWidgetFillRectAttributes } from './fill-rect';
+import { NativeWidgetImage, NativeWidgetImageAttributes } from './image';
+import { NativeWidgetPolyline, NativeWidgetPolylineAttributes } from './polyline';
+import { NativeWidgetQRCode, NativeWidgetQRCodeAttributes } from './qrcode';
+import { NativeWidgetRadioGroup, NativeWidgetRadioGroupAttributes } from './radio_group';
+import { NativeWidgetStrokeRect, NativeWidgetStrokeRectAttributes } from './stroke-rect';
+import { NativeWidgetText, NativeWidgetTextAttributes } from './text';
 
 export const NativeBindingsFactory: NodeFactory = {
   createNode(type) {
@@ -49,3 +49,26 @@ export const NativeBindingsFactory: NodeFactory = {
     }
   },
 };
+
+export declare interface NativeWidgetAttributesTypeMap {
+  "text": NativeWidgetTextAttributes;
+  "fill-rect": NativeWidgetFillRectAttributes;
+  "fill_rect": NativeWidgetFillRectAttributes;
+  "fillrect": NativeWidgetFillRectAttributes;
+  "stroke-rect": NativeWidgetStrokeRectAttributes;
+  "stroke_rect": NativeWidgetStrokeRectAttributes;
+  "strokerect": NativeWidgetStrokeRectAttributes;
+  "stroke": NativeWidgetStrokeRectAttributes;
+  "image": NativeWidgetImageAttributes;
+  "img": NativeWidgetImageAttributes;
+  "button": NativeWidgetButtonAttributes;
+  "circle": NativeWidgetCircleAttributes;
+  "arc": NativeWidgetArcAttributes;
+  "qrcode": NativeWidgetQRCodeAttributes;
+  "polyline": NativeWidgetPolylineAttributes;
+  "canvas": NativeWidgetCanvasAttributes;
+  "radio": NativeWidgetRadioGroupAttributes;
+  "radio_group": NativeWidgetRadioGroupAttributes;
+  "radiogroup": NativeWidgetRadioGroupAttributes;
+}
+

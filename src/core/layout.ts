@@ -624,14 +624,14 @@ export class EdgeInsets {
     vertical,
     horizontal,
   }: {
-    vertical: number;
-    horizontal: number;
+    vertical?: number;
+    horizontal?: number;
   }): EdgeInsets {
     return new EdgeInsets({
-      left: horizontal,
-      up: vertical,
-      right: horizontal,
-      down: vertical,
+      left: horizontal ?? 0,
+      up: vertical ?? 0,
+      right: horizontal ?? 0,
+      down: vertical ?? 0,
     });
   }
   static get zero() {
@@ -654,10 +654,10 @@ export class EdgeInsets {
   }
   getInnerConstraints(outterConstraints: Constraints): Constraints {
     return new Constraints({
-      minWidth: outterConstraints.minWidth - this.verticalTotal,
-      maxWidth: outterConstraints.maxWidth - this.verticalTotal,
-      minHeight: outterConstraints.minHeight - this.horizontalTotal,
-      maxHeight: outterConstraints.maxHeight - this.horizontalTotal,
+      minWidth: outterConstraints.minWidth - this.horizontalTotal,
+      maxWidth: outterConstraints.maxWidth - this.horizontalTotal,
+      minHeight: outterConstraints.minHeight - this.verticalTotal,
+      maxHeight: outterConstraints.maxHeight - this.verticalTotal,
     });
   }
   /**

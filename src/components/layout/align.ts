@@ -1,6 +1,6 @@
-import { Alignment, isRenderNode } from '../../core';
-import { RenderNode, RenderNodeWithSingleChild } from '../../core/base';
-import { assert } from '../../debug/index';
+import { Alignment, isRenderNode } from '../../core/index.js';
+import { RenderNode, RenderNodeWithSingleChild } from '../../core/base.js';
+import { assert } from '../../debug/index.js';
 
 export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
   sizedByParent: boolean = true;
@@ -25,7 +25,7 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
   }
   performCommit(): void {}
   setProperty(key: string, value: any): void {
-    super.setProperty(key, value)
+    super.setProperty(key, value);
     switch (key) {
       case 'x':
         {
@@ -45,14 +45,23 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
           }
         }
         break;
-      case 'alignment': {
-        if (!(value instanceof Alignment)) break;
-        if (value._x !== this._align._x || value._y !== this._align._y) {
-          this._align = Alignment.copy(value);
-          this.markNeedsLayout();
+      case 'alignment':
+        {
+          if (!(value instanceof Alignment)) break;
+          if (value._x !== this._align._x || value._y !== this._align._y) {
+            this._align = Alignment.copy(value);
+            this.markNeedsLayout();
+          }
         }
-      }
-      break;
+        break;
     }
+  }
+}
+
+export declare namespace LayoutWidgetAlign {
+  export interface Attributes {
+    x?: number;
+    y?: number;
+    alignment?: Alignment;
   }
 }

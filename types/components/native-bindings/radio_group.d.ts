@@ -35,5 +35,15 @@ export declare class NativeWidgetStateButton extends RenderWidget {
     performLayout(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface NativeWidgetRadioGroupAttributes {
+    select_src: string;
+    unselect_src: string;
+}
+export declare interface NativeWidgetStateButtonAttributes {
+    r?: number;
+    radius?: number;
+    color?: number;
+    alpha?: number;
+}
 export {};
 //# sourceMappingURL=radio_group.d.ts.map

@@ -572,10 +572,10 @@ export class EdgeInsets {
     }
     static symmetric({ vertical, horizontal, }) {
         return new EdgeInsets({
-            left: horizontal,
-            up: vertical,
-            right: horizontal,
-            down: vertical,
+            left: horizontal !== null && horizontal !== void 0 ? horizontal : 0,
+            up: vertical !== null && vertical !== void 0 ? vertical : 0,
+            right: horizontal !== null && horizontal !== void 0 ? horizontal : 0,
+            down: vertical !== null && vertical !== void 0 ? vertical : 0,
         });
     }
     static get zero() {
@@ -597,10 +597,10 @@ export class EdgeInsets {
     }
     getInnerConstraints(outterConstraints) {
         return new Constraints({
-            minWidth: outterConstraints.minWidth - this.verticalTotal,
-            maxWidth: outterConstraints.maxWidth - this.verticalTotal,
-            minHeight: outterConstraints.minHeight - this.horizontalTotal,
-            maxHeight: outterConstraints.maxHeight - this.horizontalTotal,
+            minWidth: outterConstraints.minWidth - this.horizontalTotal,
+            maxWidth: outterConstraints.maxWidth - this.horizontalTotal,
+            minHeight: outterConstraints.minHeight - this.verticalTotal,
+            maxHeight: outterConstraints.maxHeight - this.verticalTotal,
         });
     }
     /**

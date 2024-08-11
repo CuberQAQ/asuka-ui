@@ -55,6 +55,7 @@ export class NativeWidgetPolyline extends RenderWidget {
     // assert(()=>{throw Error("Test Point 2")})
   }
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
       case 'color':
@@ -75,4 +76,11 @@ export class NativeWidgetPolyline extends RenderWidget {
         break;
     }
   }
+}
+
+export declare interface NativeWidgetPolylineAttributes {
+  color?: string;
+  line_color?: string;
+  lw?: number;
+  line_width?: number;
 }

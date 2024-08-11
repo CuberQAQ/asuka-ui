@@ -52,8 +52,13 @@ export class NativeWidgetCanvas extends RenderWidget {
     // assert(()=>{throw Error("Test Point 2")})
   }
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
     // this._preferredSizeManager.setProperty(key, value);
     switch (key) {
     }
   }
+}
+
+export declare interface NativeWidgetCanvasAttributes {
+
 }

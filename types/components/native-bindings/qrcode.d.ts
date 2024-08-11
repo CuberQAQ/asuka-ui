@@ -18,5 +18,8 @@ export declare class NativeWidgetQRCode extends RenderWidget {
     performLayout(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface NativeWidgetQRCodeAttributes {
+    content: string;
+}
 export {};
 //# sourceMappingURL=qrcode.d.ts.map

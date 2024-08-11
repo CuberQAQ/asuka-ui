@@ -356,8 +356,8 @@ export declare class EdgeInsets {
         down?: number;
     }): EdgeInsets;
     static symmetric({ vertical, horizontal, }: {
-        vertical: number;
-        horizontal: number;
+        vertical?: number;
+        horizontal?: number;
     }): EdgeInsets;
     static get zero(): EdgeInsets;
     equals(e: EdgeInsets | null): boolean;

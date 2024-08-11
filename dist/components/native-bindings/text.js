@@ -31,8 +31,7 @@ export class NativeWidgetText extends RenderWidget {
         assert(widgetFactory !== null && this._widget !== null);
         widgetFactory.deleteWidget(this._widget);
     }
-    performResize() {
-    }
+    performResize() { }
     performLayout() {
         assert(Constraints.isValid(this._constraints));
         let { width: singleLineWidth, height: singleLineHeight } = hmUI.getTextLayout(this._props.text, {
@@ -70,12 +69,15 @@ export class NativeWidgetText extends RenderWidget {
         // this.size = this._constraints!.maxSize();
     }
     setProperty(key, value) {
+        super.setProperty(key, value);
         switch (key) {
             case 'text':
                 {
                     this._props.text = '' + value;
-                    if (this._widget)
+                    if (this._widget) {
                         this._widget.setProperty(hmUI.prop.TEXT, '' + value);
+                    }
+                    this.markNeedsLayout();
                 }
                 break;
             case 'color':
@@ -90,6 +92,13 @@ export class NativeWidgetText extends RenderWidget {
                     this._props.text_size = value;
                     if (this._widget)
                         this._widget.setProperty(hmUI.prop.TEXT_SIZE, value);
+                }
+                break;
+            case 'text_style':
+                {
+                    this._props.text_style = value;
+                    if (this._widget)
+                        this._widget.setProperty(hmUI.prop.TEXT_STYLE, value);
                 }
                 break;
         }

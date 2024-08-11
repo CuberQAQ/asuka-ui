@@ -1,4 +1,4 @@
-import { Constraints, Coordinate, Size } from './layout';
+import { Constraints, Coordinate, Size } from './layout.js';
 /**
  * **节点类**
  */
@@ -61,6 +61,9 @@ export declare abstract class AsukaNode {
      * @param value 属性值
      */
     setProperty(key: string, value: any): void;
+    setProperties(props: {
+        [key: string]: any;
+    }): void;
 }
 /**
  * **文字节点类**
@@ -104,7 +107,7 @@ export declare abstract class RenderNode extends AsukaNode {
      * @param type 事件类型，不区分大小写
      * @param handler 事件处理函数
      */
-    addEventListener(type: string, handler: (event: AsukaEvent) => void): void;
+    addEventListener(type: string, handler: (this: RenderNode, event: AsukaEvent) => void): void;
     /**
      * **删除事件处理器**
      * @param type 事件类型，不区分大小写
@@ -118,6 +121,7 @@ export declare abstract class RenderNode extends AsukaNode {
      * @returns
      */
     dispatchEvent(event: AsukaEvent): boolean;
+    setProperty(key: string, value: any): void;
     /**------------------挂载操作------------------- */
     /**
      *  **当元素被挂载到Element树上**
@@ -538,6 +542,11 @@ export declare abstract class RenderNodeWithSingleChild extends RenderNode {
     getChildNextSibling(child: AsukaNode): AsukaNode | null;
     setProperty(key: string, value: any): void;
 }
+export declare namespace RenderNodeWithSingleChild {
+    interface Attributes {
+        child?: AsukaNode;
+    }
+}
 /**
  * **可包含多个子节点的RenderNode**
  *
@@ -559,6 +568,10 @@ export declare class RenderNodeProxy extends RenderNodeWithSingleChild {
     performResize(): void;
     performLayout(): void;
     performCommit(): void;
+}
+export declare namespace RenderNodeProxy {
+    interface Attributes extends RenderNodeWithSingleChild.Attributes {
+    }
 }
 /**
  * **事件类**

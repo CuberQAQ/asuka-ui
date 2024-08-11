@@ -1,6 +1,6 @@
-import { Alignment, isRenderNode } from '../../core';
-import { RenderNodeWithSingleChild } from '../../core/base';
-import { assert } from '../../debug/index';
+import { Alignment, isRenderNode } from '../../core/index.js';
+import { RenderNodeWithSingleChild } from '../../core/base.js';
+import { assert } from '../../debug/index.js';
 export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
     constructor() {
         super(...arguments);

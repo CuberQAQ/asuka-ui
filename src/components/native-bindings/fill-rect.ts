@@ -54,6 +54,7 @@ export class NativeWidgetFillRect extends RenderWidget {
     // assert(()=>{throw Error("Test Point 2")})
   }
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
       case 'r':
@@ -87,4 +88,11 @@ export class NativeWidgetFillRect extends RenderWidget {
         break;
     }
   }
+}
+
+export declare interface NativeWidgetFillRectAttributes {
+  r?: number
+  radius?: number
+  color?: number
+  alpha?: number
 }

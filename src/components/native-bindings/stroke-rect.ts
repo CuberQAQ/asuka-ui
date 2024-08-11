@@ -54,6 +54,7 @@ export class NativeWidgetStrokeRect extends RenderWidget {
     // assert(()=>{throw Error("Test Point 2")})
   }
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
       case 'r':
@@ -95,4 +96,13 @@ export class NativeWidgetStrokeRect extends RenderWidget {
         break;
     }
   }
+}
+
+export declare interface NativeWidgetStrokeRectAttributes {
+  r?: number;
+  radius?: number;
+  color?: number;
+  lw?: number;
+  line_width?: number;
+  angle?: number;
 }

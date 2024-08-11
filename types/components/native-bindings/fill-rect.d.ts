@@ -18,5 +18,11 @@ export declare class NativeWidgetFillRect extends RenderWidget {
     performLayout(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface NativeWidgetFillRectAttributes {
+    r?: number;
+    radius?: number;
+    color?: number;
+    alpha?: number;
+}
 export {};
 //# sourceMappingURL=fill-rect.d.ts.map

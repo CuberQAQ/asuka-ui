@@ -16,5 +16,7 @@ export declare class NativeWidgetCanvas extends RenderWidget {
     performLayout(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface NativeWidgetCanvasAttributes {
+}
 export {};
 //# sourceMappingURL=canvas.d.ts.map

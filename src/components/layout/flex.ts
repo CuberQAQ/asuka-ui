@@ -1,11 +1,11 @@
-import { isRenderNode } from '../../core';
+import { isRenderNode } from '../../core/index.js';
 import {
   AsukaNode,
   RenderNode,
   RenderNodeProxy,
   RenderNodeWithMultiChildren,
   RenderNodeWithSingleChild,
-} from '../../core/base';
+} from '../../core/base.js';
 import {
   Axis,
   Constraints,
@@ -19,9 +19,9 @@ import {
   TextBaseline,
   VerticalDirection,
   flipAxis,
-} from '../../core/layout';
-import { assert } from '../../debug/index';
-import { max, min } from '../../tools';
+} from '../../core/layout.js';
+import { assert } from '../../debug/index.js';
+import { max, min } from '../../tools/index.js';
 
 export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
   _direction: Axis = Axis.vertical;
@@ -436,6 +436,32 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
   performCommit(): void {}
 }
 
+export declare namespace LayoutWidgetFlex {
+  export interface Attributes {
+    d?: Axis;
+    direction?: Axis;
+    /**
+     * 子元素主轴的对齐方式
+     *
+     * The main axis direction in which the children are laid out.
+     * 
+     * @alias mainAxisAlignment
+     */
+    maa?: MainAxisAlignment;
+    mainAxisAlignment?: MainAxisAlignment;
+    caa?: CrossAxisAlignment;
+    crossAxisAlignment?: CrossAxisAlignment;
+    hd?: HorizontalDirection;
+    horizontalDirection?: HorizontalDirection;
+    vd?: VerticalDirection;
+    verticalDirection?: VerticalDirection;
+    tb?: TextBaseline;
+    textBaseline?: TextBaseline;
+    // o?: number;
+    // overflow?: number;
+  }
+}
+
 export class LayoutWidgetFlexible extends RenderNodeProxy {
   _fit: FlexFit = FlexFit.loose;
   _flex: number = 1;
@@ -472,12 +498,17 @@ export class LayoutWidgetFlexible extends RenderNodeProxy {
   }
 }
 
+export declare namespace LayoutWidgetFlexible {
+  export interface Attributes extends RenderNodeProxy.Attributes {
+    fit?: FlexFit;
+    flex?: number;
+  }
+}
+
 export class LayoutWidgetExpanded extends LayoutWidgetFlexible {
   _fit: FlexFit = FlexFit.tight;
 }
-export class LayoutWidgetSpacer extends LayoutWidgetExpanded {
-  setProperty(key: string, value: any): void {
-    if (key === 'flex') assert(value > 0);
-    super.setProperty(key, value);
-  }
+
+export declare namespace LayoutWidgetExpanded {
+  export interface Attributes extends LayoutWidgetFlexible.Attributes {}
 }

@@ -34,6 +34,7 @@ export class NativeWidgetImage extends RenderWidget {
         }
     }
     setProperty(key, value) {
+        super.setProperty(key, value);
         this._preferredSizeManager.setProperty(key, value);
         switch (key) {
             case 'color':

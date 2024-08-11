@@ -19,5 +19,17 @@ export declare class NativeWidgetImage extends RenderWidget {
     _updateDefaultSize(): void;
     setProperty(key: string, value: any): void;
 }
+export declare interface NativeWidgetImageAttributes {
+    color: string;
+    alpha: number;
+    pos_x: number;
+    pos_y: number;
+    angle: number;
+    center_x: number;
+    center_y: number;
+    auto_scale: boolean;
+    auto_scale_obj_fit: string;
+    src: string;
+}
 export {};
 //# sourceMappingURL=image.d.ts.map

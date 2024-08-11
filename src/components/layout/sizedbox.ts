@@ -16,29 +16,31 @@ export class LayoutWidgetSizedBox extends RenderNodeWithSingleChild {
     // assert(this.size != null);
     assert(this._widgetFactory != null);
     assert(this._constraints != null);
+    let constraints = this._generateChildConstraints();
     if (isRenderNode(this.child)) {
       let child = this.child as RenderNode;
-      let constraints = this._generateChildConstraints();
       assert(() => {
-        if(!constraints.isTight) {
-            throw Error(`constraints.isTight == false constraints=${constraints.toString()}`)
+        if (!constraints.isTight) {
+          throw Error(
+            `constraints.isTight == false constraints=${constraints.toString()}`,
+          );
         }
-        return true
+        return true;
       });
       child.layout(constraints, {
         parentUsesSize: false,
         widgetFactory: this._widgetFactory!,
       });
-      this.size = constraints.biggest;
       child.offset = {
         x: 0,
         y: 0,
       };
     }
+    this.size = constraints.biggest;
   }
   performCommit(): void {}
   setProperty(key: string, value: any): void {
-    super.setProperty(key, value)
+    super.setProperty(key, value);
     switch (key) {
       case 'width':
       case 'w':
@@ -61,5 +63,14 @@ export class LayoutWidgetSizedBox extends RenderNodeWithSingleChild {
         }
         break;
     }
+  }
+}
+
+export declare namespace LayoutWidgetSizedBox {
+  export interface Attributes extends RenderNodeWithSingleChild.Attributes {
+    w?: number | null;
+    width?: number | null;
+    h?: number | null;
+    height?: number | null;
   }
 }

@@ -6,7 +6,7 @@ import {
   LayoutWidgetExpanded,
   LayoutWidgetFlex,
   LayoutWidgetFlexible,
-  LayoutWidgetSpacer,
+  // LayoutWidgetSpacer,
 } from './flex';
 import { LayoutWidgetHStack } from './hstack';
 import { LayoutWidgetPadding } from './padding';
@@ -26,6 +26,8 @@ export const LayoutManagerFactory: NodeFactory = {
         return new LayoutWidgetCenter(null, type);
       case 'sizedbox':
       case 'sized-box':
+      case 'space':
+      case 'spacer':
         return new LayoutWidgetSizedBox(null, type);
       case 'align':
         return new LayoutWidgetAlign(null, type);
@@ -35,8 +37,8 @@ export const LayoutManagerFactory: NodeFactory = {
         return new LayoutWidgetFlexible(null, type);
       case 'expanded':
         return new LayoutWidgetExpanded(null, type);
-      case 'spacer':
-        return new LayoutWidgetSpacer(null, type);
+      // case 'spacer':
+      // return new LayoutWidgetSpacer(null, type);
       case 'row':
         return new LayoutWidgetRow(null, type);
       case 'column':
@@ -53,3 +55,26 @@ export const LayoutManagerFactory: NodeFactory = {
     }
   },
 };
+
+export declare namespace LayoutManagerFactory {
+  export interface AttributesMap {
+    'hstack': LayoutWidgetHStack.Attributes;
+    'vstack': LayoutWidgetVStack.Attributes;
+    'center': LayoutWidgetCenter.Attributes;
+    'sizedbox': LayoutWidgetSizedBox.Attributes;
+    'sized-box': LayoutWidgetSizedBox.Attributes;
+    'space': LayoutWidgetSizedBox.Attributes;
+    'spacer': LayoutWidgetSizedBox.Attributes;
+    'align': LayoutWidgetAlign.Attributes;
+    'flex': LayoutWidgetFlex.Attributes;
+    'flexible': LayoutWidgetFlexible.Attributes;
+    'expanded': LayoutWidgetExpanded.Attributes;
+    // 'spacer': LayoutWidgetSpacer.Attributes;
+    'row': LayoutWidgetRow.Attributes;
+    'column': LayoutWidgetColumn.Attributes;
+    'padding': LayoutWidgetPadding.Attributes;
+    'stack': LayoutWidgetZStack.Attributes;
+    'zstack': LayoutWidgetZStack.Attributes;
+    'positioned': LayoutWidgetPositioned.Attributes;
+  }
+}

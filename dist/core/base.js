@@ -14,10 +14,10 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _RenderView_key;
 import { getDeviceInfo } from '@zos/device';
-import { assert, reportError } from '../debug/index';
-import { Constraints, Coordinate, Size } from './layout';
-import { NodeType, isRenderNode } from './constants';
-import { findWhere, splice } from './utils';
+import { assert, reportError } from '../debug/index.js';
+import { Constraints, Coordinate, Size } from './layout.js';
+import { NodeType, isRenderNode } from './constants.js';
+import { findWhere, splice } from './utils.js';
 import * as hmUI from '@zos/ui';
 /**
  * **节点类**
@@ -49,6 +49,11 @@ export class AsukaNode {
      * @param value 属性值
      */
     setProperty(key, value) { }
+    setProperties(props) {
+        for (const key in props) {
+            this.setProperty(key, props[key]);
+        }
+    }
 }
 /**
  * **文字节点类**
@@ -275,6 +280,7 @@ export class RenderNode extends AsukaNode {
      * @param handler 事件处理函数
      */
     addEventListener(type, handler) {
+        type = type.toLowerCase();
         (this._handlers[type] || (this._handlers[type] = [])).push(handler);
     }
     /**
@@ -283,6 +289,7 @@ export class RenderNode extends AsukaNode {
      * @param handler 事件处理函数
      */
     removeEventListener(type, handler) {
+        type = type.toLowerCase();
         splice(this._handlers[type], handler, undefined, true);
     }
     /**
@@ -307,6 +314,12 @@ export class RenderNode extends AsukaNode {
             !(cancelable && event._stop) &&
             (target = target.parentNode));
         return handlers != null;
+    }
+    setProperty(key, value) {
+        super.setProperty(key, value);
+        if (key.startsWith('on')) {
+            this.addEventListener(key.slice(2), value);
+        }
     }
     /**------------------挂载操作------------------- */
     /**
@@ -459,7 +472,12 @@ export class RenderNode extends AsukaNode {
      * 会拷贝一个新对象，不会直接使用传参的对象，调用者可以继续修改使用传递的`Size`对象
      */
     set size(size) {
-        assert(Size.isValid(size));
+        assert(() => {
+            if (!Size.isValid(size)) {
+                throw new Error(`Invalid size: ${JSON.stringify(size)}, at ${this.nodeName}, constraint: ${JSON.stringify(this._constraints)}`);
+            }
+            return true;
+        });
         assert(size != null);
         if (!Size.equals(size, this._size)) {
             this.markNeedsPlace();
@@ -792,6 +810,7 @@ export class RenderNodeWithSingleChild extends RenderNode {
         return null;
     }
     setProperty(key, value) {
+        super.setProperty(key, value);
         if (key === 'child' && value instanceof AsukaNode) {
             this.child = value;
         }
@@ -925,7 +944,7 @@ export class AsukaEvent {
         this._end = false;
         /** 一个布尔值，表示 `preventDefault()` 方法是否取消了事件的默认行为。 */
         this.defaultPrevented = false; // TODO is false should be the default value?
-        this.type = type;
+        this.type = type.toLowerCase();
         this.bubbles = !!(opts && opts.bubbles);
         this.cancelable = !!(opts && opts.cancelable);
     }

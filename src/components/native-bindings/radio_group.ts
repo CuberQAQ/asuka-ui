@@ -170,6 +170,7 @@ export class NativeWidgetStateButton extends RenderWidget {
     // assert(()=>{throw Error("Test Point 2")})
   }
   setProperty(key: string, value: any): void {
+    super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
       case 'r':
@@ -203,4 +204,18 @@ export class NativeWidgetStateButton extends RenderWidget {
         break;
     }
   }
+}
+
+export declare interface NativeWidgetRadioGroupAttributes {
+  // defaultChecked: number;
+  // stateButton: NativeWidgetStateButton[];
+  select_src: string;
+  unselect_src: string;
+}
+
+export declare interface NativeWidgetStateButtonAttributes {
+  r?: number;
+  radius?: number;
+  color?: number;
+  alpha?: number;
 }
