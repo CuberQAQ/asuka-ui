@@ -171,7 +171,7 @@ export declare namespace LayoutWidgetZStack {
     ali?: Alignment;
     align?: Alignment;
     alignment?: Alignment;
-    fit?: boolean;
+    fit?: StackFit;
   }
 }
 

@@ -25,13 +25,13 @@ import { max, min } from '../tools/math.js';
  */
 export class Constraints {
     constructor({ minHeight = 0, maxHeight = Number.POSITIVE_INFINITY, minWidth = 0, maxWidth = Number.POSITIVE_INFINITY, }) {
-        if (isNaN(minHeight))
+        if (isNaN(minHeight !== null && minHeight !== void 0 ? minHeight : NaN))
             minHeight = 0;
-        if (isNaN(minWidth))
+        if (isNaN(minWidth !== null && minWidth !== void 0 ? minWidth : NaN))
             minWidth = 0;
-        if (isNaN(maxHeight))
+        if (isNaN(maxHeight !== null && maxHeight !== void 0 ? maxHeight : NaN))
             maxHeight = 0;
-        if (isNaN(maxWidth))
+        if (isNaN(maxWidth !== null && maxWidth !== void 0 ? maxWidth : NaN))
             maxWidth = 0;
         if (minHeight < 0)
             minHeight = 0;
@@ -62,11 +62,12 @@ export class Constraints {
         });
     }
     static isValid(constraints) {
+        var _a, _b, _c, _d;
         return (constraints != null &&
-            !(isNaN(constraints.minHeight) ||
-                isNaN(constraints.minWidth) ||
-                isNaN(constraints.maxHeight) ||
-                isNaN(constraints.maxWidth)) &&
+            !(isNaN((_a = constraints.minHeight) !== null && _a !== void 0 ? _a : NaN) ||
+                isNaN((_b = constraints.minWidth) !== null && _b !== void 0 ? _b : NaN) ||
+                isNaN((_c = constraints.maxHeight) !== null && _c !== void 0 ? _c : NaN) ||
+                isNaN((_d = constraints.maxWidth) !== null && _d !== void 0 ? _d : NaN)) &&
             constraints.minHeight >= 0 &&
             constraints.minWidth >= 0 &&
             constraints.minHeight <= constraints.maxHeight &&

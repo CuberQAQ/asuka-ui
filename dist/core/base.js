@@ -592,6 +592,12 @@ export class RenderNode extends AsukaNode {
         assert(widgetFactory != null &&
             typeof widgetFactory.createWidget === 'function' &&
             typeof widgetFactory.deleteWidget === 'function');
+        assert((() => {
+            if (!Constraints.isValid(constraints)) {
+                throw new Error(`Invalid constraints: ${JSON.stringify(constraints)} \nFrom: [${this.nodeName}]${this.toString()}`);
+            }
+            return true;
+        })());
         this._widgetFactory = widgetFactory;
         // 本节点是否为重布局边界（即布局脏标记是否会传递给本节点的父节点，并触发父节点重新布局）
         let isRelayoutBoundary = !parentUsesSize || // 父节点不使用该节点的Size，也就是该节点的Size是固定的(到下次布局前)，所以该节点子树的布局变化不需要父节点重新布局

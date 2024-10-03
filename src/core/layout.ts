@@ -41,10 +41,10 @@ export class Constraints {
     minWidth?: number;
     maxWidth?: number;
   }) {
-    if (isNaN(minHeight)) minHeight = 0;
-    if (isNaN(minWidth)) minWidth = 0;
-    if (isNaN(maxHeight)) maxHeight = 0;
-    if (isNaN(maxWidth)) maxWidth = 0;
+    if (isNaN(minHeight ?? NaN)) minHeight = 0;
+    if (isNaN(minWidth ?? NaN)) minWidth = 0;
+    if (isNaN(maxHeight ?? NaN)) maxHeight = 0;
+    if (isNaN(maxWidth ?? NaN)) maxWidth = 0;
     if (minHeight < 0) minHeight = 0;
     if (minWidth < 0) minWidth = 0;
     if (maxHeight < minHeight) maxHeight = minHeight;
@@ -73,10 +73,10 @@ export class Constraints {
     return (
       constraints != null &&
       !(
-        isNaN(constraints.minHeight) ||
-        isNaN(constraints.minWidth) ||
-        isNaN(constraints.maxHeight) ||
-        isNaN(constraints.maxWidth)
+        isNaN(constraints.minHeight ?? NaN) ||
+        isNaN(constraints.minWidth ?? NaN) ||
+        isNaN(constraints.maxHeight ?? NaN) ||
+        isNaN(constraints.maxWidth ?? NaN)
       ) &&
       constraints.minHeight >= 0 &&
       constraints.minWidth >= 0 &&

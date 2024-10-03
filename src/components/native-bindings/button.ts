@@ -40,6 +40,14 @@ export class NativeWidgetButton extends RenderWidget {
             }),
           );
         },
+        longpress_func: () => {
+          this.dispatchEvent(
+            new AsukaEvent('longpress', {
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
+        },
       });
     } else {
       assert(this._widget != null);

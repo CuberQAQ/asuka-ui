@@ -189,7 +189,7 @@ export abstract class RenderNode extends AsukaNode {
    * @param handler 事件处理函数
    */
   removeEventListener(type: string, handler: (event: AsukaEvent) => void) {
-    type = type.toLowerCase()
+    type = type.toLowerCase();
     splice(this._handlers[type], handler, undefined, true);
   }
   /**
@@ -222,7 +222,7 @@ export abstract class RenderNode extends AsukaNode {
 
   setProperty(key: string, value: any): void {
     super.setProperty(key, value);
-    if(key.startsWith('on')) {
+    if (key.startsWith('on')) {
       this.addEventListener(key.slice(2), value);
     }
   }
@@ -489,10 +489,12 @@ export abstract class RenderNode extends AsukaNode {
    */
   set size(size: Size | null) {
     assert(() => {
-      if(!Size.isValid(size)) {
-        throw new Error(`Invalid size: ${JSON.stringify(size)}, at ${this.nodeName}, constraint: ${JSON.stringify(this._constraints)}`);
+      if (!Size.isValid(size)) {
+        throw new Error(
+          `Invalid size: ${JSON.stringify(size)}, at ${this.nodeName}, constraint: ${JSON.stringify(this._constraints)}`,
+        );
       }
-      return true
+      return true;
     });
     assert(size != null);
     if (!Size.equals(size, this._size)) {
@@ -727,6 +729,16 @@ export abstract class RenderNode extends AsukaNode {
       widgetFactory != null &&
         typeof widgetFactory.createWidget === 'function' &&
         typeof widgetFactory.deleteWidget === 'function',
+    );
+    assert(
+      (() => {
+        if (!Constraints.isValid(constraints)) {
+          throw new Error(
+            `Invalid constraints: ${JSON.stringify(constraints)} \nFrom: [${this.nodeName}]${this.toString()}`,
+          );
+        }
+        return true;
+      })(),
     );
     this._widgetFactory = widgetFactory;
 
@@ -1095,8 +1107,7 @@ export class RenderNodeProxy extends RenderNodeWithSingleChild {
 }
 
 export declare namespace RenderNodeProxy {
-  export interface Attributes extends RenderNodeWithSingleChild.Attributes {
-  }
+  export interface Attributes extends RenderNodeWithSingleChild.Attributes {}
 }
 
 /**

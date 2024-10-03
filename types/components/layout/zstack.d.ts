@@ -14,7 +14,7 @@ export declare namespace LayoutWidgetZStack {
         ali?: Alignment;
         align?: Alignment;
         alignment?: Alignment;
-        fit?: boolean;
+        fit?: StackFit;
     }
 }
 export declare class LayoutWidgetPositioned extends RenderNodeProxy {

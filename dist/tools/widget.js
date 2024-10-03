@@ -1,4 +1,4 @@
-import { Size } from '../core';
+import { Constraints, Size } from '../core';
 import { assert } from '../debug';
 import { max } from './math';
 export class PreferSizeManager {
@@ -33,7 +33,14 @@ export class PreferSizeManager {
      */
     chooseSize() {
         assert(this._node._constraints != null);
+        assert(Constraints.isValid(this._node._constraints));
         this._mixedSize = this._getMixedSize();
+        // assert(()=>{
+        //   if(this._mixedSize?.h == null || this._mixedSize?.w == null){
+        //     throw new Error(`PreferSizeManager.chooseSize() error: ${this._mixedSize?.h} ${this._mixedSize?.w}, at ${this._node.nodeName}`)
+        //   }
+        //   return true
+        // })
         this._node.size = this._node._constraints.constrain(this._mixedSize);
     }
     setProperty(key, value) {
