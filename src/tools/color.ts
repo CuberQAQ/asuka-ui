@@ -1,4 +1,4 @@
-import { max, min } from "./math";
+import { max, min } from "./math.js";
 
 export class Color {
   static random() {

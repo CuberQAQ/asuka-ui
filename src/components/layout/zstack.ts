@@ -5,9 +5,9 @@ import {
   RenderNodeWithMultiChildren,
   Size,
   StackFit,
-} from '../../core';
-import { assert } from '../../debug';
-import { max } from '../../tools';
+} from '../../core/index.js';
+import { assert } from '../../debug/index.js';
+import { max } from '../../tools/index.js';
 
 export class LayoutWidgetZStack extends RenderNodeWithMultiChildren {
   _align: Alignment = Alignment.topLeft;

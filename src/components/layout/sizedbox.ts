@@ -1,6 +1,6 @@
-import { Constraints, isRenderNode } from '../../core';
-import { RenderNode, RenderNodeWithSingleChild } from '../../core/base';
-import { assert } from '../../debug/index';
+import { Constraints, isRenderNode } from '../../core/index.js';
+import { RenderNode, RenderNodeWithSingleChild } from '../../core/base.js';
+import { assert } from '../../debug/index.js';
 export class LayoutWidgetSizedBox extends RenderNodeWithSingleChild {
   protected _width: number | null = null;
   protected _height: number | null = null;

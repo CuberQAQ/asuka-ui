@@ -1,19 +1,19 @@
-import { NodeFactory } from '../../core/base';
-import { LayoutWidgetAlign } from './align';
-import { LayoutWidgetCenter } from './center';
-import { LayoutWidgetColumn } from './column';
+import { NodeFactory } from '../../core/base.js';
+import { LayoutWidgetAlign } from './align.js';
+import { LayoutWidgetCenter } from './center.js';
+import { LayoutWidgetColumn } from './column.js';
 import {
   LayoutWidgetExpanded,
   LayoutWidgetFlex,
   LayoutWidgetFlexible,
   // LayoutWidgetSpacer,
-} from './flex';
-import { LayoutWidgetHStack } from './hstack';
-import { LayoutWidgetPadding } from './padding';
-import { LayoutWidgetRow } from './row';
-import { LayoutWidgetSizedBox } from './sizedbox';
-import { LayoutWidgetVStack } from './vstack';
-import { LayoutWidgetPositioned, LayoutWidgetZStack } from './zstack';
+} from './flex.js';
+import { LayoutWidgetHStack } from './hstack.js';
+import { LayoutWidgetPadding } from './padding.js';
+import { LayoutWidgetRow } from './row.js';
+import { LayoutWidgetSizedBox } from './sizedbox.js';
+import { LayoutWidgetVStack } from './vstack.js';
+import { LayoutWidgetPositioned, LayoutWidgetZStack } from './zstack.js';
 
 export const LayoutManagerFactory: NodeFactory = {
   createNode(type) {

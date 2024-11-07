@@ -1,9 +1,9 @@
 import * as hmUI from '@zos/ui';
-import { AsukaEvent, RenderWidget, WidgetFactory } from '../../core/base';
-import { Size, Coordinate, Constraints } from '../../core/layout';
-import { assert } from '../../debug/index';
+import { AsukaEvent, RenderWidget, WidgetFactory } from '../../core/base.js';
+import { Size, Coordinate, Constraints } from '../../core/layout.js';
+import { assert } from '../../debug/index.js';
 import { px } from '@zos/utils';
-import { PreferSizeAttributesMixin, PreferSizeManager } from '../../tools/widget';
+import { PreferSizeAttributesMixin, PreferSizeManager } from '../../tools/widget.js';
 
 type HmWidget = any;
 const defaultProps = {

@@ -1,6 +1,6 @@
-import { EdgeInsets, isRenderNode } from '../../core';
-import { RenderNode, RenderNodeWithSingleChild } from '../../core/base';
-import { assert } from '../../debug/index';
+import { EdgeInsets, isRenderNode } from '../../core/index.js';
+import { RenderNode, RenderNodeWithSingleChild } from '../../core/base.js';
+import { assert } from '../../debug/index.js';
 
 export class LayoutWidgetPadding extends RenderNodeWithSingleChild {
   sizedByParent: boolean = false;

@@ -1,15 +1,15 @@
-import { NodeFactory } from '../../core/base';
-import { NativeWidgetArc, NativeWidgetArcAttributes } from './arc';
-import { NativeWidgetButton, NativeWidgetButtonAttributes } from './button';
-import { NativeWidgetCanvas, NativeWidgetCanvasAttributes } from './canvas';
-import { NativeWidgetCircle, NativeWidgetCircleAttributes } from './circle';
-import { NativeWidgetFillRect, NativeWidgetFillRectAttributes } from './fill-rect';
-import { NativeWidgetImage, NativeWidgetImageAttributes } from './image';
-import { NativeWidgetPolyline, NativeWidgetPolylineAttributes } from './polyline';
-import { NativeWidgetQRCode, NativeWidgetQRCodeAttributes } from './qrcode';
-import { NativeWidgetRadioGroup, NativeWidgetRadioGroupAttributes } from './radio_group';
-import { NativeWidgetStrokeRect, NativeWidgetStrokeRectAttributes } from './stroke-rect';
-import { NativeWidgetText, NativeWidgetTextAttributes } from './text';
+import { NodeFactory } from '../../core/base.js';
+import { NativeWidgetArc, NativeWidgetArcAttributes } from './arc.js';
+import { NativeWidgetButton, NativeWidgetButtonAttributes } from './button.js';
+import { NativeWidgetCanvas, NativeWidgetCanvasAttributes } from './canvas.js';
+import { NativeWidgetCircle, NativeWidgetCircleAttributes } from './circle.js';
+import { NativeWidgetFillRect, NativeWidgetFillRectAttributes } from './fill-rect.js';
+import { NativeWidgetImage, NativeWidgetImageAttributes } from './image.js';
+import { NativeWidgetPolyline, NativeWidgetPolylineAttributes } from './polyline.js';
+import { NativeWidgetQRCode, NativeWidgetQRCodeAttributes } from './qrcode.js';
+import { NativeWidgetRadioGroup, NativeWidgetRadioGroupAttributes } from './radio_group.js';
+import { NativeWidgetStrokeRect, NativeWidgetStrokeRectAttributes } from './stroke-rect.js';
+import { NativeWidgetText, NativeWidgetTextAttributes } from './text.js';
 
 export const NativeBindingsFactory: NodeFactory = {
   createNode(type) {

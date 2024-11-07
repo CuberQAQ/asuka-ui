@@ -12,8 +12,23 @@
     "./dist",
     "./src",
     "./types",
-    "./readme.md"
+    "./readme.md",
+    "./package.json",
+    "./packages/**/*"
   ],
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./types/index.d.ts"
+    },
+    "./solid": {
+      "default": "./dist/solid.js",
+      "types": "./types/solid.d.ts"
+    },
+    "./jsx-runtime": {
+      "types": "./jsx-runtime.d.ts"
+    }
+  },
   "devDependencies": {
     "prettier": "3.2.5"
   },
@@ -21,6 +36,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@zeppos/device-types": "^3.0.0"
+    "@zeppos/device-types": "^3.0.0",
+    "solid-js": "^1.9.3"
   }
 }

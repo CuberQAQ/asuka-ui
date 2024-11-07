@@ -1,4 +1,4 @@
-import { AsukaNode } from './base';
+import { AsukaNode } from './base.js';
 
 export const NodeType = {
   TEXT_NODE: 1,

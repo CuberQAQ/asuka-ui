@@ -1,6 +1,6 @@
-import { Constraints, RenderNode, Size } from '../core';
-import { assert } from '../debug';
-import { max } from './math';
+import { Constraints, RenderNode, Size } from '../core/index.js';
+import { assert } from '../debug/index.js';
+import { max } from './math.js';
 
 type NullableSize = { w: number | null; h: number | null };
 export class PreferSizeManager {

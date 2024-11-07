@@ -3,12 +3,12 @@ import {
   RenderWidget,
   RenderWidgetFactoryProvider,
   WidgetFactory,
-} from '../../core/base';
-import { Size, Coordinate, Constraints } from '../../core/layout';
-import { assert } from '../../debug/index';
+} from '../../core/base.js';
+import { Size, Coordinate, Constraints } from '../../core/layout.js';
+import { assert } from '../../debug/index.js';
 import { px } from '@zos/utils';
-import { PreferSizeManager } from '../../tools/widget';
-import { findWhere, splice } from '../../core';
+import { PreferSizeManager } from '../../tools/widget.js';
+import { findWhere, splice } from '../../core/index.js';
 
 type HmWidget = any;
 const defaultProps = {

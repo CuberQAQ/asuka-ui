@@ -1,14 +1,14 @@
-import { LayoutManagerFactory } from "./layout/index"
-import { NativeWidgetAttributesTypeMap } from "./native-bindings/index"
+import { LayoutManagerFactory } from './layout/index.js'
+import { NativeWidgetAttributesTypeMap } from './native-bindings/index.js'
 
-export * from "./native-bindings/index"
-export * from "./layout/index"
+export * from './native-bindings/index.js'
+export * from './layout/index.js'
 
 export declare type InsideIntrinsicElements = NativeWidgetAttributesTypeMap & LayoutManagerFactory.AttributesMap & {
             
 }
 declare global {
-    namespace JSX {
-        type IntrinsicElements = InsideIntrinsicElements
+    export namespace JSX {
+        export type IntrinsicElements = InsideIntrinsicElements
     }
   }

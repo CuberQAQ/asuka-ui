@@ -1,5 +1,5 @@
-import { Axis } from "../../core";
-import { LayoutWidgetFlex } from "./flex";
+import { Axis } from '../../core/index.js';
+import { LayoutWidgetFlex } from './flex.js';
 
 export class LayoutWidgetRow extends LayoutWidgetFlex {
     _direction: Axis = Axis.horizontal;
