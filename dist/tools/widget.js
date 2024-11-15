@@ -2,14 +2,14 @@ import { Constraints, Size } from '../core/index.js';
 import { assert } from '../debug/index.js';
 import { max } from './math.js';
 export class PreferSizeManager {
+    _node;
+    _preferredSize = null;
     constructor(_node) {
         this._node = _node;
-        this._preferredSize = null;
-        this._defaultSize = null;
-        this._mixedSize = null;
     }
+    _defaultSize = null;
     setDefaultSize(size) {
-        this._defaultSize = size == null ? null : Object.assign({}, size);
+        this._defaultSize = size == null ? null : { ...size };
         let mixedSize = this._getMixedSize();
         if (!Size.equals(mixedSize, this._mixedSize)) {
             this._node.markNeedsLayout();
@@ -19,11 +19,15 @@ export class PreferSizeManager {
     getDefaultSize() {
         return this._defaultSize;
     }
+    _mixedSize = null;
     _getMixedSize() {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
         return {
-            w: (_d = (_b = (_a = this._preferredSize) === null || _a === void 0 ? void 0 : _a.w) !== null && _b !== void 0 ? _b : (_c = this._defaultSize) === null || _c === void 0 ? void 0 : _c.w) !== null && _d !== void 0 ? _d : Number.POSITIVE_INFINITY,
-            h: (_h = (_f = (_e = this._preferredSize) === null || _e === void 0 ? void 0 : _e.h) !== null && _f !== void 0 ? _f : (_g = this._defaultSize) === null || _g === void 0 ? void 0 : _g.h) !== null && _h !== void 0 ? _h : Number.POSITIVE_INFINITY,
+            w: this._preferredSize?.w ??
+                this._defaultSize?.w ??
+                Number.POSITIVE_INFINITY,
+            h: this._preferredSize?.h ??
+                this._defaultSize?.h ??
+                Number.POSITIVE_INFINITY,
         };
     }
     /**

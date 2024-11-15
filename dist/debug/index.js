@@ -28,7 +28,6 @@ export function assert(success) {
     }
 }
 export function reportError(extra, err) {
-    var _a, _b, _c;
     console.log("Reporting Error...");
     // logger.error(`ERROR:message=${extra} err=${err}`);
     let bg = hmUI.createWidget(hmUI.widget.FILL_RECT, {
@@ -53,11 +52,11 @@ export function reportError(extra, err) {
     let y = px(100);
     y += showSubtitle(extra, y) + px(10);
     y += showSubtitle('Error Name', y) + px(5);
-    y += showCode((_a = err.name) !== null && _a !== void 0 ? _a : 'No Name Founded', y) + px(10);
+    y += showCode(err.name ?? 'No Name Founded', y) + px(10);
     y += showSubtitle('Error Message', y) + px(5);
-    y += showCode((_b = err.message) !== null && _b !== void 0 ? _b : 'No Message Founded', y) + px(10);
+    y += showCode(err.message ?? 'No Message Founded', y) + px(10);
     y += showSubtitle('Error Stack', y) + px(5);
-    y += showCode((_c = err.stack) !== null && _c !== void 0 ? _c : 'No Stack Founded', y) + px(10);
+    y += showCode(err.stack ?? 'No Stack Founded', y) + px(10);
     bg.setProperty(hmUI.prop.MORE, {
         x: 0,
         y: 0,

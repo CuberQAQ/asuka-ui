@@ -15,7 +15,7 @@ export class NativeWidgetQRCode extends RenderWidget {
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
   sizedByParent: boolean = false;
-  onCommit({
+  onCommit({ 
     size,
     position,
     widgetFactory,

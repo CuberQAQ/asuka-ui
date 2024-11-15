@@ -12,7 +12,7 @@ import { NativeWidgetStrokeRect, NativeWidgetStrokeRectAttributes } from './stro
 import { NativeWidgetText, NativeWidgetTextAttributes } from './text.js';
 
 export const NativeBindingsFactory: NodeFactory = {
-  createNode(type) {
+  createNode(type) { 
     switch (type) {
       case 'text':
         return new NativeWidgetText(null, type);

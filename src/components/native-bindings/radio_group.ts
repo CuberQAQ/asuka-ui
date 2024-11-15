@@ -10,10 +10,10 @@ import { px } from '@zos/utils';
 import { PreferSizeManager } from '../../tools/widget.js';
 import { findWhere, splice } from '../../core/index.js';
 
-type HmWidget = any;
+type HmWidget = any; 
 const defaultProps = {
   color: 0xcc0000,
-};
+}; 
 export class NativeWidgetRadioGroup extends RenderWidgetFactoryProvider {
   _widget: HmWidget | null = null;
   _props: Record<string, any> = { ...defaultProps };

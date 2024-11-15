@@ -24,14 +24,18 @@ import { max, min } from '../tools/math.js';
  * @todo 处理`NaN`的情况
  */
 export class Constraints {
+    minHeight;
+    maxHeight;
+    minWidth;
+    maxWidth;
     constructor({ minHeight = 0, maxHeight = Number.POSITIVE_INFINITY, minWidth = 0, maxWidth = Number.POSITIVE_INFINITY, }) {
-        if (isNaN(minHeight !== null && minHeight !== void 0 ? minHeight : NaN))
+        if (isNaN(minHeight ?? NaN))
             minHeight = 0;
-        if (isNaN(minWidth !== null && minWidth !== void 0 ? minWidth : NaN))
+        if (isNaN(minWidth ?? NaN))
             minWidth = 0;
-        if (isNaN(maxHeight !== null && maxHeight !== void 0 ? maxHeight : NaN))
+        if (isNaN(maxHeight ?? NaN))
             maxHeight = 0;
-        if (isNaN(maxWidth !== null && maxWidth !== void 0 ? maxWidth : NaN))
+        if (isNaN(maxWidth ?? NaN))
             maxWidth = 0;
         if (minHeight < 0)
             minHeight = 0;
@@ -62,12 +66,11 @@ export class Constraints {
         });
     }
     static isValid(constraints) {
-        var _a, _b, _c, _d;
         return (constraints != null &&
-            !(isNaN((_a = constraints.minHeight) !== null && _a !== void 0 ? _a : NaN) ||
-                isNaN((_b = constraints.minWidth) !== null && _b !== void 0 ? _b : NaN) ||
-                isNaN((_c = constraints.maxHeight) !== null && _c !== void 0 ? _c : NaN) ||
-                isNaN((_d = constraints.maxWidth) !== null && _d !== void 0 ? _d : NaN)) &&
+            !(isNaN(constraints.minHeight ?? NaN) ||
+                isNaN(constraints.minWidth ?? NaN) ||
+                isNaN(constraints.maxHeight ?? NaN) ||
+                isNaN(constraints.maxWidth ?? NaN)) &&
             constraints.minHeight >= 0 &&
             constraints.minWidth >= 0 &&
             constraints.minHeight <= constraints.maxHeight &&
@@ -253,7 +256,7 @@ export class Size {
     }
     static copy(size) {
         assert(size != null);
-        return Object.assign({}, size);
+        return { ...size };
     }
     /**
      * **分别相加两个`Size`对象的长和宽，并返回一个新对象.**
@@ -297,7 +300,7 @@ export class Size {
 export class Coordinate {
     static copy(coord) {
         assert(coord != null);
-        return Object.assign({}, coord);
+        return { ...coord };
     }
     static isValid(coord) {
         // isFinite(NaN) -> false
@@ -331,14 +334,14 @@ export class Coordinate {
     }
 }
 export class Alignment {
+    _x = 0;
+    _y = 0;
     /**
      * **创建对齐**
      * @param x [-1.0,1.0] 当-1为最左 0为中 1为最右
      * @param y [-1.0,1.0] 当-1为最上 0为中 1为最下
      */
     constructor(x, y) {
-        this._x = 0;
-        this._y = 0;
         if (x) {
             this._x = min(max(x, -1.0), 1.0);
         }
@@ -548,6 +551,10 @@ export var FlexFit;
  * **边距**
  */
 export class EdgeInsets {
+    _left;
+    _up;
+    _right;
+    _down;
     constructor({ left, up, right, down, }) {
         this._left = left;
         this._up = up;
@@ -563,20 +570,19 @@ export class EdgeInsets {
         });
     }
     static only(value) {
-        var _a, _b, _c, _d;
         return new EdgeInsets({
-            left: (_a = value === null || value === void 0 ? void 0 : value.left) !== null && _a !== void 0 ? _a : 0,
-            up: (_b = value === null || value === void 0 ? void 0 : value.up) !== null && _b !== void 0 ? _b : 0,
-            right: (_c = value === null || value === void 0 ? void 0 : value.right) !== null && _c !== void 0 ? _c : 0,
-            down: (_d = value === null || value === void 0 ? void 0 : value.down) !== null && _d !== void 0 ? _d : 0,
+            left: value?.left ?? 0,
+            up: value?.up ?? 0,
+            right: value?.right ?? 0,
+            down: value?.down ?? 0,
         });
     }
     static symmetric({ vertical, horizontal, }) {
         return new EdgeInsets({
-            left: horizontal !== null && horizontal !== void 0 ? horizontal : 0,
-            up: vertical !== null && vertical !== void 0 ? vertical : 0,
-            right: horizontal !== null && horizontal !== void 0 ? horizontal : 0,
-            down: vertical !== null && vertical !== void 0 ? vertical : 0,
+            left: horizontal ?? 0,
+            up: vertical ?? 0,
+            right: horizontal ?? 0,
+            down: vertical ?? 0,
         });
     }
     static get zero() {

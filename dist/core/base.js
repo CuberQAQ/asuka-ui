@@ -1,18 +1,6 @@
 // import { AsukaLayoutNode } from "./asuka-layout";
 // import { defineStyleReflection } from "./layout-bridge";
 // import { splice, findWhere, createAttributeFilter, isElement } from "./util";
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
-    if (kind === "m") throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
-};
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-};
-var _RenderView_key;
 import { getDeviceInfo } from '@zos/device';
 import { assert, reportError } from '../debug/index.js';
 import { Constraints, Coordinate, Size } from './layout.js';
@@ -23,6 +11,22 @@ import * as hmUI from '@zos/ui';
  * **节点类**
  */
 export class AsukaNode {
+    nodeType;
+    nodeName;
+    /** 父节点 */
+    parentNode = null;
+    /**
+     * **父节点数据插槽**
+     * @description
+     * 用于存储父节点希望子节点存储的信息。
+     *
+     * 由于子模型无关、布局算法高度自定义等特点，出现父节点需要子节点存储数据的情况十分常见，故提供本插槽属性。
+     * 将在`mountChild`时调用的`_setupMountingChild`中赋值为`{}`(空对象)进行初始化，并在`unmountChild`时调用的`_setupUnmounting`中赋值为`null`进行清除。
+     * 其他任何时候，框架不会访问或改变它。
+     *
+     * 举例：多个采用双向链表存储子节点时诸如`nextSibling`，`previousSibling`等。
+     */
+    parentData;
     get nextSibling() {
         if (this.parentNode === null)
             return null;
@@ -39,8 +43,6 @@ export class AsukaNode {
     nodeName) {
         this.nodeType = nodeType;
         this.nodeName = nodeName;
-        /** 父节点 */
-        this.parentNode = null;
     }
     /**------------------属性设置------------------- */
     /**
@@ -59,6 +61,7 @@ export class AsukaNode {
  * **文字节点类**
  */
 export class AsukaTextNode extends AsukaNode {
+    _text;
     constructor(text) {
         super(NodeType.TEXT_NODE, '#text'); // 3: TEXT_NODE
         this._text = text;
@@ -111,167 +114,10 @@ export class AsukaUnknownNode extends AsukaNode {
  * 涉及布局、绘制、事件都是可渲染节点
  */
 export class RenderNode extends AsukaNode {
+    _handlers = {};
     // protected _attributes: {};
     constructor(nodeTyle, nodeName) {
         super(nodeTyle || NodeType.RENDER_NODE, nodeName); // 1: ELEMENT_NODE
-        this._handlers = {};
-        // {
-        //   if (ref) splice(this.childNodes, ref, child);
-        //   else this.childNodes.push(child);
-        //   this._setupChild(child)
-        //   return child;
-        // }
-        /**------------------布局相关------------------- */
-        /**
-         * **需要布局(布局脏标记)**
-         *
-         * 框架应保证执行布局操作时，所有非孤立且拥有布局脏标记的节点的`layout`都被调用，并将脏标记清除，并且应迅速(在下一个JS事件循环时)
-         * 若为孤立且拥有脏标记的节点，在转为非孤立状态后应立即请求布局，并在下一个JS事件循环时调用其`layout`，并清除脏标记。
-         *
-         * 框架保证，拥有脏标记的节点在`layout`过程中，其`performLayout`被调用（如果`sizedByParent`为`true`，还保证其`performResize`被调用）。
-         * 通常，所有可能使布局发生变化的操作，都应当做布局脏标记(调用`markNeedsLayout`)
-         */
-        this._needsLayout = false;
-        /**
-         * **需要确认最终位置(放置脏标记)**
-         *
-         * 框架应保证执行确认最终位置操作(简称放置操作)时，所有非孤立且拥有放置脏标记的节点的`place`都被调用，并将脏标记清除，并且应迅速(在下一个JS事件循环时)
-         * 若为孤立且拥有脏标记的节点，在转为非孤立状态后应立即请求放置，并在下一个JS事件循环时调用其`place`，并清除脏标记。
-         *
-         * 框架保证，拥有脏标记的节点在`place`过程中，其`position`会得到更新，并根据情况执行`performCommit`操作.
-         *
-         * @see markNeedsPlace 更多有关`放置脏标记`的原理，请参见该方法
-         */
-        this._needsPlace = false;
-        /**
-         * **必须执行推送操作(强制更新标记)**
-         *
-         * 框架应保证所有非孤立且拥有强制更新标记的节点的`performCommit`和`onCommit`都被调用，并将该标记清除，并且应迅速(在下一个JS事件循环时，`place`过程中)
-         * 若为孤立且拥有脏标记的节点，在转为非孤立状态后应立即请求放置，并在下一个JS事件循环时的`place`时执行推送操作，并清除脏标记。
-         */
-        this._mustCommit = false;
-        /**
-         * **本节点的深度**
-         *
-         * 定义`AsukaUI`的深度为`0`.
-         *
-         * 仅当`_attached`为`true`，即不为孤立节点时有效
-         *
-         * 主要用于在`AsukaUI`执行`layout`和`place`操作时确定先后顺序（深度小的节点先，深度大的节点后），保证不重复计算并正确.
-         *
-         * 在`attach`时更新
-         */
-        this._depth = 0;
-        /**
-         * **本节点尺寸**
-         *
-         * 请勿直接修改本属性，而是通过`size`(getter/setter)修改或访问
-         */
-        this._size = null;
-        /**
-         * **本节点尺寸是否已改变**
-         *
-         * 用途：
-         * - 在`size`setter中判断并标记为`true`.
-         * - 在`place`方法中用于判断是否需要执行`performCommit`操作，并将其标记为`false`
-         */
-        this._sizeChanged = false;
-        /**
-         * **相对父节点的坐标偏移**
-         *
-         * 请勿直接修改本属性，而是通过`offset`(getter/setter)修改或访问
-         */
-        this._offset = null;
-        /**
-         * **该节点在当前坐标系的位置**
-         *
-         * 请勿直接修改本属性，而是通过`position`(getter/setter)修改或访问
-         */
-        this._position = null;
-        /**
-         * **局部重布局边界**
-         * @description
-         * 当子树添加脏标记时，重布局边界节点不会调用`markParentNeedsLayout`将脏标记传递给父节点；
-         * 而是阻止向上传递，（非孤立时）向框架中心请求布局，并将自身加入待布局列表。
-         *
-         * 无论是否孤立，若`_relayoutBoundary`不为`null`，就应保证该属性指向的节点与本节点连通。
-         *
-         * 局部重布局边界需要保证其子树的布局发生变化时(不考虑挂载等非布局操作)，不会影响其父节点的布局结果，即父节点不需要重新布局。
-         *
-         * 具体而言，满足以下四种条件其一的节点，可作为为局部重布局边界。
-         * 1. `sizedByParent == true` 由于布局过程从子节点传递到父节点的信息仅有子节点尺寸，且该节点的尺寸仅由父节点提供的布局约束有关，
-         * 因此，该节点的子树的布局发生变化时，父节点的布局结果不变，可作为为局部重布局边界。
-         * 2. `parentUsesSize == false` 父节点布局过程不计算和使用子节点尺寸，也就是子节点子树发生的任何布局变化即使令该子节点的尺寸发生变化，
-         * 也不影响父节点的布局结果。
-         * 3. `constraints.isTight` 父节点传递的布局约束为严格约束（最大和最小宽度相等且最大和最小高度相等，符合该约束的尺寸仅有一种），
-         * 4. `!isRenderNode(this.parentNode)` 父节点不是可渲染节点，故布局只能从本节点开始。
-         *
-         */
-        this._relayoutBoundary = null;
-        /**
-         * **为子节点提供新的坐标系**
-         * @description
-         * 若为`false`, 子节点的`position`将等于其`offset`加上本节点的`position`；
-         * 若为`true`，子节点的`position`将直接等于其`offset`（相当于本节点为子节点的坐标系原点）
-         *
-         * 用于如`ViewContainer`这样的为子节点提供了新的坐标参考系的组件中
-         *
-         * **请务必在对象初始化完成前确定，后续不应再修改**，若为`true`，
-         *
-         * 请考虑在`performLayout`中调用子节点的`layout`时传递为子节点提供的控件工厂(可能是`hmUI.widget.GROUP`或`VIEW_CONTAINER`之类的实例).
-         */
-        this.isNewCoordOrigin = false;
-        /**
-         * **上一次`layout`时获得的控件工厂**
-         * @description
-         * 所谓控件工厂，是指`hmUI`、`GROUP`实例或`VIEW_CONTAINER`实例等，拥有符合接口要求的`createWidget`和`deleteWidget`的方法的对象。
-         * 请注意区分`hmUI`中的其他方法，控件工厂不一定都实现了这些方法。
-         *
-         * 在下一次`layout`或取消挂载或转为孤立树等发生前有效。
-         */
-        this._widgetFactory = null;
-        /**
-         * **上一次`layout()`时获得的布局约束**
-         * @description 布局约束，是指该节点的尺寸的允许范围。
-         * 布局约束由`minHeight`，`maxHeight`，`minWidth`和`maxWidth`四个属性构成，详见`Constraints`
-         *
-         * 应仅当从未布局过时为`null`，其它任何时候都不得将该变量设置为空.
-         */
-        this._constraints = null;
-        /**
-         * **渲染就绪状态**
-         *
-         * 即子节点是否被挂载在可渲染的树上（即根节点是否连接了AsukaUI）
-         *
-         * 仅当该属性为`true`时，才注册重新布局请求(即调用 `AsukaUI#addRelayoutNode` 或 `AsukaUI#requestRelayout` 方法)
-         */
-        this._attached = false;
-        /**
-         * **框架中心**
-         * @description
-         * 提供处理布局、放置请求，处理基本默认事件，管理活动视图等核心任务。
-         *
-         * 仅当`this._attach`为`true`时，才允许调用其`AsukaUI#addRelayoutNode` 或 `AsukaUI#requestRelayout` 等方法
-         *
-         * 目前由AsukaUI创建节点时设置，不应自行修改)
-         *
-         */
-        this._core = null;
-        /**
-         * **布局尺寸仅由父节点传递的约束决定**
-         * @description
-         * 该节点的Size是否只与父节点传递的Constrains有关，而不与其它任何因素（如子节点的布局）有关。
-         *
-         * 换句话说，当父节点传递的布局约束不变时，本节点的子树无论发生产生何种布局变化，本节点的布局尺寸都不变，
-         * 父节点就不需要重新布局（布局尺寸是父节点在布局时会参考子节点的唯一因素）
-         *
-         * 设置为`true`时，该节点将被标记为重布局边界(RelayoutBoundary)，其及其子节点产生的任何布局脏标记都不会传递给父节点，从而实现优化。
-         * **如果为`true`，请在`performResize`中计算本节点的布局尺寸，不要在`performLayout`里做出任何计算或改变布局尺寸的操作。**
-         *
-         * 该属性由子类自行按需设置。
-         * 除了对象初始化完成前，**请在改变本属性后调用`markSizedByParentChanged`，**保证布局结果得到正确更新。
-         */
-        this.sizedByParent = false;
     }
     /**------------------事件处理------------------- */
     /**
@@ -460,6 +306,67 @@ export class RenderNode extends AsukaNode {
         }
         this.markNeedsLayout(); // 或许将该职责转移到`unmountChild`上
     }
+    // {
+    //   if (ref) splice(this.childNodes, ref, child);
+    //   else this.childNodes.push(child);
+    //   this._setupChild(child)
+    //   return child;
+    // }
+    /**------------------布局相关------------------- */
+    /**
+     * **需要布局(布局脏标记)**
+     *
+     * 框架应保证执行布局操作时，所有非孤立且拥有布局脏标记的节点的`layout`都被调用，并将脏标记清除，并且应迅速(在下一个JS事件循环时)
+     * 若为孤立且拥有脏标记的节点，在转为非孤立状态后应立即请求布局，并在下一个JS事件循环时调用其`layout`，并清除脏标记。
+     *
+     * 框架保证，拥有脏标记的节点在`layout`过程中，其`performLayout`被调用（如果`sizedByParent`为`true`，还保证其`performResize`被调用）。
+     * 通常，所有可能使布局发生变化的操作，都应当做布局脏标记(调用`markNeedsLayout`)
+     */
+    _needsLayout = false;
+    /**
+     * **需要确认最终位置(放置脏标记)**
+     *
+     * 框架应保证执行确认最终位置操作(简称放置操作)时，所有非孤立且拥有放置脏标记的节点的`place`都被调用，并将脏标记清除，并且应迅速(在下一个JS事件循环时)
+     * 若为孤立且拥有脏标记的节点，在转为非孤立状态后应立即请求放置，并在下一个JS事件循环时调用其`place`，并清除脏标记。
+     *
+     * 框架保证，拥有脏标记的节点在`place`过程中，其`position`会得到更新，并根据情况执行`performCommit`操作.
+     *
+     * @see markNeedsPlace 更多有关`放置脏标记`的原理，请参见该方法
+     */
+    _needsPlace = false;
+    /**
+     * **必须执行推送操作(强制更新标记)**
+     *
+     * 框架应保证所有非孤立且拥有强制更新标记的节点的`performCommit`和`onCommit`都被调用，并将该标记清除，并且应迅速(在下一个JS事件循环时，`place`过程中)
+     * 若为孤立且拥有脏标记的节点，在转为非孤立状态后应立即请求放置，并在下一个JS事件循环时的`place`时执行推送操作，并清除脏标记。
+     */
+    _mustCommit = false;
+    /**
+     * **本节点的深度**
+     *
+     * 定义`AsukaUI`的深度为`0`.
+     *
+     * 仅当`_attached`为`true`，即不为孤立节点时有效
+     *
+     * 主要用于在`AsukaUI`执行`layout`和`place`操作时确定先后顺序（深度小的节点先，深度大的节点后），保证不重复计算并正确.
+     *
+     * 在`attach`时更新
+     */
+    _depth = 0;
+    /**
+     * **本节点尺寸**
+     *
+     * 请勿直接修改本属性，而是通过`size`(getter/setter)修改或访问
+     */
+    _size = null;
+    /**
+     * **本节点尺寸是否已改变**
+     *
+     * 用途：
+     * - 在`size`setter中判断并标记为`true`.
+     * - 在`place`方法中用于判断是否需要执行`performCommit`操作，并将其标记为`false`
+     */
+    _sizeChanged = false;
     /**
      * **设置本节点尺寸**
      *
@@ -495,6 +402,12 @@ export class RenderNode extends AsukaNode {
         return this._size;
     }
     /**
+     * **相对父节点的坐标偏移**
+     *
+     * 请勿直接修改本属性，而是通过`offset`(getter/setter)修改或访问
+     */
+    _offset = null;
+    /**
      * **设置本节点相对父坐标的偏移**
      *
      * 会检查是否发生变化，如果变化了将自动调用`markNeedsPlace`，使位置得到更新，并自动按需调用`performCommit`.
@@ -522,6 +435,12 @@ export class RenderNode extends AsukaNode {
     get offset() {
         return this._offset;
     }
+    /**
+     * **该节点在当前坐标系的位置**
+     *
+     * 请勿直接修改本属性，而是通过`position`(getter/setter)修改或访问
+     */
+    _position = null;
     /**
      * **获取本节点在当前坐标系的位置**
      *
@@ -555,6 +474,90 @@ export class RenderNode extends AsukaNode {
             this._position = Coordinate.copy(position);
         }
     }
+    /**
+     * **局部重布局边界**
+     * @description
+     * 当子树添加脏标记时，重布局边界节点不会调用`markParentNeedsLayout`将脏标记传递给父节点；
+     * 而是阻止向上传递，（非孤立时）向框架中心请求布局，并将自身加入待布局列表。
+     *
+     * 无论是否孤立，若`_relayoutBoundary`不为`null`，就应保证该属性指向的节点与本节点连通。
+     *
+     * 局部重布局边界需要保证其子树的布局发生变化时(不考虑挂载等非布局操作)，不会影响其父节点的布局结果，即父节点不需要重新布局。
+     *
+     * 具体而言，满足以下四种条件其一的节点，可作为为局部重布局边界。
+     * 1. `sizedByParent == true` 由于布局过程从子节点传递到父节点的信息仅有子节点尺寸，且该节点的尺寸仅由父节点提供的布局约束有关，
+     * 因此，该节点的子树的布局发生变化时，父节点的布局结果不变，可作为为局部重布局边界。
+     * 2. `parentUsesSize == false` 父节点布局过程不计算和使用子节点尺寸，也就是子节点子树发生的任何布局变化即使令该子节点的尺寸发生变化，
+     * 也不影响父节点的布局结果。
+     * 3. `constraints.isTight` 父节点传递的布局约束为严格约束（最大和最小宽度相等且最大和最小高度相等，符合该约束的尺寸仅有一种），
+     * 4. `!isRenderNode(this.parentNode)` 父节点不是可渲染节点，故布局只能从本节点开始。
+     *
+     */
+    _relayoutBoundary = null;
+    /**
+     * **为子节点提供新的坐标系**
+     * @description
+     * 若为`false`, 子节点的`position`将等于其`offset`加上本节点的`position`；
+     * 若为`true`，子节点的`position`将直接等于其`offset`（相当于本节点为子节点的坐标系原点）
+     *
+     * 用于如`ViewContainer`这样的为子节点提供了新的坐标参考系的组件中
+     *
+     * **请务必在对象初始化完成前确定，后续不应再修改**，若为`true`，
+     *
+     * 请考虑在`performLayout`中调用子节点的`layout`时传递为子节点提供的控件工厂(可能是`hmUI.widget.GROUP`或`VIEW_CONTAINER`之类的实例).
+     */
+    isNewCoordOrigin = false;
+    /**
+     * **上一次`layout`时获得的控件工厂**
+     * @description
+     * 所谓控件工厂，是指`hmUI`、`GROUP`实例或`VIEW_CONTAINER`实例等，拥有符合接口要求的`createWidget`和`deleteWidget`的方法的对象。
+     * 请注意区分`hmUI`中的其他方法，控件工厂不一定都实现了这些方法。
+     *
+     * 在下一次`layout`或取消挂载或转为孤立树等发生前有效。
+     */
+    _widgetFactory = null;
+    /**
+     * **上一次`layout()`时获得的布局约束**
+     * @description 布局约束，是指该节点的尺寸的允许范围。
+     * 布局约束由`minHeight`，`maxHeight`，`minWidth`和`maxWidth`四个属性构成，详见`Constraints`
+     *
+     * 应仅当从未布局过时为`null`，其它任何时候都不得将该变量设置为空.
+     */
+    _constraints = null;
+    /**
+     * **渲染就绪状态**
+     *
+     * 即子节点是否被挂载在可渲染的树上（即根节点是否连接了AsukaUI）
+     *
+     * 仅当该属性为`true`时，才注册重新布局请求(即调用 `AsukaUI#addRelayoutNode` 或 `AsukaUI#requestRelayout` 方法)
+     */
+    _attached = false;
+    /**
+     * **框架中心**
+     * @description
+     * 提供处理布局、放置请求，处理基本默认事件，管理活动视图等核心任务。
+     *
+     * 仅当`this._attach`为`true`时，才允许调用其`AsukaUI#addRelayoutNode` 或 `AsukaUI#requestRelayout` 等方法
+     *
+     * 目前由AsukaUI创建节点时设置，不应自行修改)
+     *
+     */
+    _core = null;
+    /**
+     * **布局尺寸仅由父节点传递的约束决定**
+     * @description
+     * 该节点的Size是否只与父节点传递的Constrains有关，而不与其它任何因素（如子节点的布局）有关。
+     *
+     * 换句话说，当父节点传递的布局约束不变时，本节点的子树无论发生产生何种布局变化，本节点的布局尺寸都不变，
+     * 父节点就不需要重新布局（布局尺寸是父节点在布局时会参考子节点的唯一因素）
+     *
+     * 设置为`true`时，该节点将被标记为重布局边界(RelayoutBoundary)，其及其子节点产生的任何布局脏标记都不会传递给父节点，从而实现优化。
+     * **如果为`true`，请在`performResize`中计算本节点的布局尺寸，不要在`performLayout`里做出任何计算或改变布局尺寸的操作。**
+     *
+     * 该属性由子类自行按需设置。
+     * 除了对象初始化完成前，**请在改变本属性后调用`markSizedByParentChanged`，**保证布局结果得到正确更新。
+     */
+    sizedByParent = false;
     /**
      * **有条件地更新子树重布局边界**
      * @description
@@ -774,10 +777,7 @@ export class RenderNodeWithNoChild extends RenderNode {
     }
 }
 export class RenderNodeWithSingleChild extends RenderNode {
-    constructor() {
-        super(...arguments);
-        this._child = null;
-    }
+    _child = null;
     set child(child) {
         if (this._child) {
             this.unmountChild(this._child);
@@ -828,12 +828,9 @@ export class RenderNodeWithSingleChild extends RenderNode {
  * 通过双向链表存储子结构
  */
 export class RenderNodeWithMultiChildren extends RenderNode {
-    constructor() {
-        super(...arguments);
-        this._firstChild = null;
-        this._lastChild = null;
-        this._childRenderNodeCount = 0;
-    }
+    _firstChild = null;
+    _lastChild = null;
+    _childRenderNodeCount = 0;
     get firstChild() {
         return this._firstChild;
     }
@@ -907,10 +904,7 @@ export class RenderNodeWithMultiChildren extends RenderNode {
     }
 }
 export class RenderNodeProxy extends RenderNodeWithSingleChild {
-    constructor() {
-        super(...arguments);
-        this.sizedByParent = false;
-    }
+    sizedByParent = false;
     performResize() { }
     performLayout() {
         assert(this._constraints != null);
@@ -935,6 +929,20 @@ export class RenderNodeProxy extends RenderNodeWithSingleChild {
  * @description
  */
 export class AsukaEvent {
+    type;
+    bubbles;
+    /** 触发事件的元素, 默认为调用`depatchEvent()`的元素 */
+    target;
+    /** 正在响应该事件的元素 */
+    currentTarget;
+    /** 该事件是否可取消 */
+    cancelable;
+    /** 该事件是否已被取消继续冒泡传播(当`cancelable`为`true`时有效) */
+    _stop = false;
+    /** 该事件是否已被立即取消继续传播(当`cancelable`为`true`时有效) */
+    _end = false;
+    /** 一个布尔值，表示 `preventDefault()` 方法是否取消了事件的默认行为。 */
+    defaultPrevented = false; // TODO is false should be the default value?
     /**
      * **创建事件对象**
      * @param type 事件类型，不区分大小写
@@ -944,12 +952,6 @@ export class AsukaEvent {
      */
     constructor(type, opts) {
         this.type = type;
-        /** 该事件是否已被取消继续冒泡传播(当`cancelable`为`true`时有效) */
-        this._stop = false;
-        /** 该事件是否已被立即取消继续传播(当`cancelable`为`true`时有效) */
-        this._end = false;
-        /** 一个布尔值，表示 `preventDefault()` 方法是否取消了事件的默认行为。 */
-        this.defaultPrevented = false; // TODO is false should be the default value?
         this.type = type.toLowerCase();
         this.bubbles = !!(opts && opts.bubbles);
         this.cancelable = !!(opts && opts.cancelable);
@@ -986,22 +988,22 @@ export class AsukaEvent {
  * 外界访问
  */
 export class RenderView extends RenderNodeWithSingleChild {
+    #key;
     constructor({ core, widgetFactory, size, key, offset = { x: 0, y: 0 }, }) {
         super(NodeType.RENDER_NODE, '#frame');
-        _RenderView_key.set(this, void 0);
         this._widgetFactory = widgetFactory;
         this._depth = 1;
         this._size = Size.copy(size);
         this._offset = Coordinate.copy(offset);
         this._position = Coordinate.copy(offset);
         this._core = core;
-        __classPrivateFieldSet(this, _RenderView_key, key, "f");
+        this.#key = key;
         this._attached = true;
         this._relayoutBoundary = this;
         // this.isNewCoordOrigin = true;
     }
     get key() {
-        return __classPrivateFieldGet(this, _RenderView_key, "f");
+        return this.#key;
     }
     /**
      * @override
@@ -1076,12 +1078,8 @@ export class RenderView extends RenderNodeWithSingleChild {
     performResize() { }
     performCommit() { }
 }
-_RenderView_key = new WeakMap();
 export class RenderWidget extends RenderNodeWithNoChild {
-    constructor() {
-        super(...arguments);
-        this._displaying = false;
-    }
+    _displaying = false;
     onAttach() {
         this.markMustCommit();
     }
@@ -1107,12 +1105,9 @@ export class RenderWidget extends RenderNodeWithNoChild {
  *
  */
 export class RenderWidgetFactoryProvider extends RenderNodeWithSingleChild {
-    constructor() {
-        super(...arguments);
-        this._displaying = false;
-        this.sizedByParent = false;
-        this.childWidgetFactory = null;
-    }
+    _displaying = false;
+    sizedByParent = false;
+    childWidgetFactory = null;
     onAttach() {
         this.markMustCommit();
     }
@@ -1154,18 +1149,11 @@ export class RenderWidgetFactoryProvider extends RenderNodeWithSingleChild {
     }
 }
 export class AsukaUI {
+    viewRecord = {};
+    _activeFrame = null;
+    _nodeFactories = [];
+    static instance = null;
     constructor() {
-        this.viewRecord = {};
-        this._activeFrame = null;
-        this._nodeFactories = [];
-        /** 需要重新布局的起始节点 */
-        this._nodesNeedsLayout = [];
-        /** 需要重新放置的节点 */
-        this._nodesNeedsPlace = [];
-        /** 在布局和放置任务完成后调用的任务 */
-        this._runAfterTasks = [];
-        /** 异步管理器句柄(可能是setTimeout或者Promise之类的) */
-        this._asyncHandler = null;
         assert(AsukaUI.instance === null);
         AsukaUI.instance = this;
     }
@@ -1191,7 +1179,7 @@ export class AsukaUI {
                         h: mount.getProperty(hmUI.prop.H),
                     };
                 }
-                catch (_a) {
+                catch {
                     reportError('createFrame', Error('Get View size failed'));
                 }
             }
@@ -1233,6 +1221,14 @@ export class AsukaUI {
     createTextNode(text) {
         return new AsukaTextNode(text);
     }
+    /** 需要重新布局的起始节点 */
+    _nodesNeedsLayout = [];
+    /** 需要重新放置的节点 */
+    _nodesNeedsPlace = [];
+    /** 在布局和放置任务完成后调用的任务 */
+    _runAfterTasks = [];
+    /** 异步管理器句柄(可能是setTimeout或者Promise之类的) */
+    _asyncHandler = null;
     /**
      * **添加需要重新布局的节点**
      */
@@ -1333,5 +1329,4 @@ export class AsukaUI {
         this._runAfterTasks = [];
     }
 }
-AsukaUI.instance = null;
 //# sourceMappingURL=base.js.map

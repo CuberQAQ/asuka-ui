@@ -4,18 +4,18 @@ import { Size, Coordinate, Constraints } from '../../core/layout.js';
 import { assert } from '../../debug/index.js';
 import { px } from '@zos/utils';
 import { PreferSizeManager } from '../../tools/widget.js';
-
+ 
 type HmWidget = any;
 const defaultProps = {
   color: 0xcc4400,
-};
+}; 
 export class NativeWidgetStrokeRect extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
   sizedByParent: boolean = false;
   onCommit({
-    size,
+    size, 
     position,
     widgetFactory,
     initial,

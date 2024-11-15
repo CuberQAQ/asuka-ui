@@ -2,17 +2,13 @@ import { Constraints, isRenderNode } from '../../core/index.js';
 import { RenderNodeWithSingleChild } from '../../core/base.js';
 import { assert } from '../../debug/index.js';
 export class LayoutWidgetSizedBox extends RenderNodeWithSingleChild {
-    constructor() {
-        super(...arguments);
-        this._width = null;
-        this._height = null;
-    }
+    _width = null;
+    _height = null;
     _generateChildConstraints() {
-        var _a, _b;
         assert(this._constraints != null);
         return Constraints.createTight({
-            w: (_a = this._width) !== null && _a !== void 0 ? _a : Number.POSITIVE_INFINITY,
-            h: (_b = this._height) !== null && _b !== void 0 ? _b : Number.POSITIVE_INFINITY,
+            w: this._width ?? Number.POSITIVE_INFINITY,
+            h: this._height ?? Number.POSITIVE_INFINITY,
         }).adoptBy(this._constraints);
     }
     performResize() { }

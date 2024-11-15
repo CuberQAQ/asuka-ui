@@ -7,21 +7,26 @@ const defaultProps = {
     color: 0xcc0000,
 };
 export class NativeWidgetFillRect extends RenderWidget {
-    constructor() {
-        super(...arguments);
-        this._widget = null;
-        this._preferredSizeManager = new PreferSizeManager(this);
-        this._props = Object.assign({}, defaultProps);
-        this.sizedByParent = false;
-    }
+    _widget = null;
+    _preferredSizeManager = new PreferSizeManager(this);
+    _props = { ...defaultProps };
+    sizedByParent = false;
     onCommit({ size, position, widgetFactory, initial, }) {
         if (initial) {
             assert(this._widget === null);
-            this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, Object.assign(Object.assign(Object.assign({}, this._props), position), size));
+            this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
+                ...this._props,
+                ...position,
+                ...size,
+            });
         }
         else {
             assert(this._widget != null);
-            this._widget.setProperty(hmUI.prop.MORE, Object.assign(Object.assign(Object.assign({}, this._props), position), size));
+            this._widget.setProperty(hmUI.prop.MORE, {
+                ...this._props,
+                ...position,
+                ...size,
+            });
         }
     }
     onDestroy(widgetFactory) {
@@ -45,7 +50,11 @@ export class NativeWidgetFillRect extends RenderWidget {
                 {
                     this._props.radius = value;
                     if (this._widget)
-                        this._widget.setProperty(hmUI.prop.MORE, Object.assign(Object.assign(Object.assign({}, this.size), this.position), this._props));
+                        this._widget.setProperty(hmUI.prop.MORE, {
+                            ...this.size,
+                            ...this.position,
+                            ...this._props,
+                        });
                 }
                 break;
             case 'color':
@@ -59,7 +68,11 @@ export class NativeWidgetFillRect extends RenderWidget {
                 {
                     this._props.alpha = value;
                     if (this._widget)
-                        this._widget.setProperty(hmUI.prop.MORE, Object.assign(Object.assign(Object.assign({}, this.size), this.position), this._props));
+                        this._widget.setProperty(hmUI.prop.MORE, {
+                            ...this.size,
+                            ...this.position,
+                            ...this._props,
+                        });
                 }
                 break;
         }

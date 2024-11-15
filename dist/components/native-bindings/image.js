@@ -4,21 +4,26 @@ import { assert } from '../../debug/index.js';
 import { PreferSizeManager } from '../../tools/widget.js';
 const defaultProps = {};
 export class NativeWidgetImage extends RenderWidget {
-    constructor() {
-        super(...arguments);
-        this._widget = null;
-        this._props = Object.assign({}, defaultProps);
-        this._preferredSizeManager = new PreferSizeManager(this);
-        this.sizedByParent = false;
-    }
+    _widget = null;
+    _props = { ...defaultProps };
+    _preferredSizeManager = new PreferSizeManager(this);
+    sizedByParent = false;
     onCommit({ size, position, widgetFactory, initial, }) {
         if (initial) {
             assert(this._widget === null);
-            this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, Object.assign(Object.assign(Object.assign({}, this._props), position), size));
+            this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
+                ...this._props,
+                ...position,
+                ...size,
+            });
         }
         else {
             assert(this._widget != null);
-            this._widget.setProperty(hmUI.prop.MORE, Object.assign(Object.assign(Object.assign({}, this._props), position), size));
+            this._widget.setProperty(hmUI.prop.MORE, {
+                ...this._props,
+                ...position,
+                ...size,
+            });
         }
     }
     onDestroy(widgetFactory) {
@@ -112,7 +117,9 @@ export class NativeWidgetImage extends RenderWidget {
                     if (value !== this._props.auto_scale) {
                         this._props.auto_scale = value;
                         if (this._widget)
-                            this._widget.setProperty(hmUI.prop.MORE, Object.assign({}, this._props));
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this._props,
+                            });
                     }
                 }
                 break;
@@ -121,7 +128,9 @@ export class NativeWidgetImage extends RenderWidget {
                     if (value !== this._props.auto_scale_obj_fit) {
                         this._props.auto_scale_obj_fit = value;
                         if (this._widget)
-                            this._widget.setProperty(hmUI.prop.MORE, Object.assign({}, this._props));
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this._props,
+                            });
                     }
                 }
                 break;

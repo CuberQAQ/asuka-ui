@@ -4,7 +4,7 @@ export * from './native-bindings/index.js';
 export * from './layout/index.js';
 export declare type InsideIntrinsicElements = NativeWidgetAttributesTypeMap & LayoutManagerFactory.AttributesMap & {};
 declare global {
-    namespace JSX {
+    export namespace JSX {
         type IntrinsicElements = InsideIntrinsicElements;
     }
 }

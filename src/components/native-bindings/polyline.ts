@@ -11,7 +11,7 @@ export class NativeWidgetPolyline extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
-  sizedByParent: boolean = false;
+  sizedByParent: boolean = false; 
   onCommit({
     size,
     position,

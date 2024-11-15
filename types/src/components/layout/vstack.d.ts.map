@@ -1,1 +1,0 @@
-{"version":3,"file":"vstack.d.ts","sourceRoot":"","sources":["../../../../src/components/layout/vstack.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,2BAA2B,EAAE,MAAM,oBAAoB,CAAC;AAIjE,qBAAa,kBAAmB,SAAQ,2BAA2B;IACjE,aAAa,EAAE,OAAO,CAAQ;IAC9B,aAAa,IAAI,IAAI;IAIrB,aAAa,IAAI,IAAI;IAwBrB,aAAa,IAAI,IAAI;CACtB;AAED,MAAM,CAAC,OAAO,WAAW,kBAAkB,CAAC;IAC1C,UAAiB,UAAU;KAE1B;CACF"}

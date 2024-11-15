@@ -11,20 +11,25 @@ const defaultProps = {
     align_v: hmUI.align.CENTER_V,
 };
 export class NativeWidgetText extends RenderWidget {
-    constructor() {
-        super(...arguments);
-        this._widget = null;
-        this._props = Object.assign({}, defaultProps);
-        this.sizedByParent = false;
-    }
+    _widget = null;
+    _props = { ...defaultProps };
+    sizedByParent = false;
     onCommit({ size, position, widgetFactory, initial, }) {
         if (initial) {
             assert(this._widget === null);
-            this._widget = widgetFactory.createWidget(hmUI.widget.TEXT, Object.assign(Object.assign(Object.assign({}, this._props), position), size));
+            this._widget = widgetFactory.createWidget(hmUI.widget.TEXT, {
+                ...this._props,
+                ...position,
+                ...size,
+            });
         }
         else {
             assert(this._widget != null);
-            this._widget.setProperty(hmUI.prop.MORE, Object.assign(Object.assign(Object.assign({}, this._props), position), size));
+            this._widget.setProperty(hmUI.prop.MORE, {
+                ...this._props,
+                ...position,
+                ...size,
+            });
         }
     }
     onDestroy(widgetFactory) {

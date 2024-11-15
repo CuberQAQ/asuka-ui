@@ -2,10 +2,7 @@ import { RenderNodeWithMultiChildren } from '../../core/base.js';
 import { Constraints } from '../../core/layout.js';
 import { assert } from '../../debug/index.js';
 export class LayoutWidgetVStack extends RenderNodeWithMultiChildren {
-    constructor() {
-        super(...arguments);
-        this.sizedByParent = true;
-    }
+    sizedByParent = true;
     performResize() {
         assert(this._constraints != null);
         this.size = this._constraints.biggest;

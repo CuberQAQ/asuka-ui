@@ -10,7 +10,7 @@ const defaultProps = {
   color: 0xffffff,
   text_size: Number(px(36)),
   align_h: hmUI.align.CENTER_H,
-  align_v: hmUI.align.CENTER_V,
+  align_v: hmUI.align.CENTER_V, 
 };
 export class NativeWidgetText extends RenderWidget {
   _widget: HmWidget | null = null;

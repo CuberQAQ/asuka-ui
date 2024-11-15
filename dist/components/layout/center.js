@@ -2,10 +2,7 @@ import { isRenderNode } from '../../core/index.js';
 import { RenderNodeWithSingleChild } from '../../core/base.js';
 import { assert } from '../../debug/index.js';
 export class LayoutWidgetCenter extends RenderNodeWithSingleChild {
-    constructor() {
-        super(...arguments);
-        this.sizedByParent = true;
-    }
+    sizedByParent = true;
     performResize() {
         assert(this._constraints != null);
         this.size = this._constraints.biggest;

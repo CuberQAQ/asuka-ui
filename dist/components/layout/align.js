@@ -2,11 +2,8 @@ import { Alignment, isRenderNode } from '../../core/index.js';
 import { RenderNodeWithSingleChild } from '../../core/base.js';
 import { assert } from '../../debug/index.js';
 export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
-    constructor() {
-        super(...arguments);
-        this.sizedByParent = true;
-        this._align = Alignment.center;
-    }
+    sizedByParent = true;
+    _align = Alignment.center;
     performResize() {
         assert(this._constraints != null);
         this.size = this._constraints.biggest;
