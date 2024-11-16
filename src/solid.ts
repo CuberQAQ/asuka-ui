@@ -77,6 +77,7 @@ export const {
 });
 
 export * from 'solid-js';
+export * as store from 'solid-js/store'
 // export * from '@cuberqaq/asuka-ui';
 // export function createRenderer() {
 //   return _createRenderer({
