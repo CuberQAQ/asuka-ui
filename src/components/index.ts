@@ -7,8 +7,8 @@ export * from './layout/index.js'
 export declare type InsideIntrinsicElements = NativeWidgetAttributesTypeMap & LayoutManagerFactory.AttributesMap & {
             
 }
-declare global {
-    export namespace JSX {
-        export type IntrinsicElements = InsideIntrinsicElements
-    }
-  }
+// declare global {
+//     export namespace JSX {
+//         export type IntrinsicElements = InsideIntrinsicElements
+//     }
+//   }
