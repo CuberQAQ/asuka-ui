@@ -1,21 +1,19 @@
 import * as hmUI from '@zos/ui';
-import { RenderWidget, WidgetFactory } from '../../core/base.js';
-import { Size, Coordinate, Constraints } from '../../core/layout.js';
-import { assert } from '../../debug/index.js';
+import { RenderWidget, WidgetFactory } from'../../../core/base.js';
+import { Size, Coordinate, Constraints } from'../../../core/layout.js';
+import { assert } from'../../../debug/index.js';
 import { px } from '@zos/utils';
-import { PreferSizeManager } from '../../tools/widget.js';
- 
+import { PreferSizeManager } from'../../../tools/widget.js';
+
 type HmWidget = any;
-const defaultProps = {
-  color: 0xcc4400,
-}; 
-export class NativeWidgetStrokeRect extends RenderWidget {
+const defaultProps = {};
+export class NativeWidgetPolyline extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
-  sizedByParent: boolean = false;
+  sizedByParent: boolean = false; 
   onCommit({
-    size, 
+    size,
     position,
     widgetFactory,
     initial,
@@ -27,11 +25,14 @@ export class NativeWidgetStrokeRect extends RenderWidget {
   }): void {
     if (initial) {
       assert(this._widget === null);
-      this._widget = widgetFactory.createWidget(hmUI.widget.STROKE_RECT, {
-        ...this._props,
-        ...position,
-        ...size,
-      });
+      this._widget = widgetFactory.createWidget(
+        (hmUI.widget as any).GRADKIENT_POLYLINE,
+        {
+          ...this._props,
+          ...position,
+          ...size,
+        },
+      );
     } else {
       assert(this._widget != null);
       this._widget!.setProperty(hmUI.prop.MORE, {
@@ -57,33 +58,12 @@ export class NativeWidgetStrokeRect extends RenderWidget {
     super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
-      case 'r':
-      case 'radius':
-        {
-          this._props.radius = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              ...this._props,
-            });
-        }
-        break;
       case 'color':
+      case 'line_color':
         {
-          this._props.color = value;
-          if (this._widget) this._widget.setProperty(hmUI.prop.COLOR, value);
-        }
-        break;
-      case 'angle':
-        {
-          this._props.angle = value;
+          this._props.line_color = value;
           if (this._widget)
-            this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.size,
-              ...this.position,
-              ...this._props,
-            });
+            this._widget.setProperty((hmUI.prop as any).LINE_COLOR, value);
         }
         break;
       case 'lw':
@@ -98,11 +78,9 @@ export class NativeWidgetStrokeRect extends RenderWidget {
   }
 }
 
-export declare interface NativeWidgetStrokeRectAttributes {
-  r?: number;
-  radius?: number;
-  color?: number;
+export declare interface NativeWidgetPolylineAttributes {
+  color?: string;
+  line_color?: string;
   lw?: number;
   line_width?: number;
-  angle?: number;
 }

@@ -1,4 +1,4 @@
-import { NodeFactory } from '../../core/base.js';
+import { NodeFactory } from'../../../core/base.js';
 import { NativeWidgetArc, NativeWidgetArcAttributes } from './arc.js';
 import { NativeWidgetButton, NativeWidgetButtonAttributes } from './button.js';
 import { NativeWidgetCanvas, NativeWidgetCanvasAttributes } from './canvas.js';

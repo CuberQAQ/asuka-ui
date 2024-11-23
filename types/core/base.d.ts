@@ -724,14 +724,15 @@ export interface NodeFactory {
     createNode(type: string): AsukaNode | null;
 }
 export declare class AsukaUI {
+    platform: Platform;
     viewRecord: Record<string | symbol, RenderView | null>;
     protected _activeFrame: RenderView | null;
     protected _nodeFactories: NodeFactory[];
     static instance: AsukaUI | null;
-    constructor();
+    constructor(platform: Platform);
     get activeFrame(): RenderView | null;
     set activeFrame(frame: RenderView | null);
-    mountView(mount?: WidgetFactory, options?: {
+    mountView(mount: WidgetFactory, options?: {
         size?: Size;
         offset?: Coordinate;
     }): RenderView;
@@ -790,5 +791,8 @@ export declare class AsukaUI {
     _layout(): void;
     _place(): void;
     _runAfter(): void;
+}
+export interface Platform {
+    getWidgetFactorySize(wf: WidgetFactory): Size;
 }
 //# sourceMappingURL=base.d.ts.map

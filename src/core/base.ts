@@ -2,13 +2,13 @@
 // import { defineStyleReflection } from "./layout-bridge";
 // import { splice, findWhere, createAttributeFilter, isElement } from "./util";
 
-import { getDeviceInfo } from '@zos/device';
+// import { getDeviceInfo } from '@zos/device';
 import { assert, reportError } from '../debug/index.js';
 import { objectTag } from '../decorator/debug.js';
 import { Constraints, Coordinate, Size } from './layout.js';
 import { NodeType, isRenderNode } from './constants.js';
 import { findWhere, splice } from './utils.js';
-import * as hmUI from '@zos/ui';
+// import * as hmUI from '@zos/ui';
 
 /**
  * **节点类**
@@ -1423,7 +1423,7 @@ export class AsukaUI {
   protected _activeFrame: RenderView | null = null;
   protected _nodeFactories: NodeFactory[] = [];
   static instance: AsukaUI | null = null;
-  constructor() {
+  constructor(public platform: Platform) {
     assert(AsukaUI.instance === null);
     AsukaUI.instance = this;
   }
@@ -1435,25 +1435,27 @@ export class AsukaUI {
     this._activeFrame = frame;
   }
   mountView(
-    mount: WidgetFactory = hmUI,
+    mount: WidgetFactory,
     options?: { size?: Size; offset?: Coordinate },
   ): RenderView {
     let size = options && options.size;
     let offset = (options && options.offset) || { x: 0, y: 0 };
     if (!size) {
-      if (mount === hmUI) {
-        let { width, height } = getDeviceInfo();
-        size = { w: width, h: height };
-      } else {
-        try {
-          size = {
-            w: (mount as any).getProperty(hmUI.prop.W),
-            h: (mount as any).getProperty(hmUI.prop.H),
-          };
-        } catch {
-          reportError('createFrame', Error('Get View size failed'));
-        }
-      }
+    //   if (mount === hmUI) {
+    //     let { width, height } = getDeviceInfo();
+    //     size = { w: width, h: height };
+    //   } else {
+    //     try {
+    //       size = {
+    //         w: (mount as any).getProperty(hmUI.prop.W),
+    //         h: (mount as any).getProperty(hmUI.prop.H),
+    //       };
+    //     } catch {
+    //       reportError('createFrame', Error('Get View size failed'));
+    //     }
+    //   }
+
+      size = this.platform.getWidgetFactorySize(mount);
     }
     if (!size) throw Error('Get View size failed');
     let view = new RenderView({
@@ -1599,4 +1601,8 @@ export class AsukaUI {
     }
     this._runAfterTasks = [];
   }
+}
+
+export interface Platform {
+  getWidgetFactorySize(wf: WidgetFactory): Size
 }

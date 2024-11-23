@@ -1,18 +1,21 @@
 import * as hmUI from '@zos/ui';
-import { RenderWidget, WidgetFactory } from '../../core/base.js';
-import { Size, Coordinate, Constraints } from '../../core/layout.js';
-import { assert } from '../../debug/index.js';
+import { RenderWidget, WidgetFactory } from'../../../core/base.js';
+import { Size, Coordinate, Constraints } from'../../../core/layout.js';
+import { assert } from'../../../debug/index.js';
 import { px } from '@zos/utils';
-import { PreferSizeManager } from '../../tools/widget.js';
+import { PreferSizeManager } from'../../../tools/widget.js';
 
 type HmWidget = any;
-const defaultProps = {};
-export class NativeWidgetPolyline extends RenderWidget {
+const defaultProps = {
+  content: 'null',
+};
+// Not support bg_x bg_y bg_w bg_h, please use container or stack etc to add background decoration.
+export class NativeWidgetQRCode extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
-  sizedByParent: boolean = false; 
-  onCommit({
+  sizedByParent: boolean = false;
+  onCommit({ 
     size,
     position,
     widgetFactory,
@@ -25,14 +28,11 @@ export class NativeWidgetPolyline extends RenderWidget {
   }): void {
     if (initial) {
       assert(this._widget === null);
-      this._widget = widgetFactory.createWidget(
-        (hmUI.widget as any).GRADKIENT_POLYLINE,
-        {
-          ...this._props,
-          ...position,
-          ...size,
-        },
-      );
+      this._widget = widgetFactory.createWidget((hmUI.widget as any).QRCODE, {
+        ...this._props,
+        ...position,
+        ...size,
+      });
     } else {
       assert(this._widget != null);
       this._widget!.setProperty(hmUI.prop.MORE, {
@@ -58,29 +58,21 @@ export class NativeWidgetPolyline extends RenderWidget {
     super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
-      case 'color':
-      case 'line_color':
+      case 'content':
         {
-          this._props.line_color = value;
+          this._props.content = value;
           if (this._widget)
-            this._widget.setProperty((hmUI.prop as any).LINE_COLOR, value);
-        }
-        break;
-      case 'lw':
-      case 'line_width':
-        {
-          this._props.line_width = value;
-          if (this._widget)
-            this._widget.setProperty(hmUI.prop.LINE_WIDTH, value);
+            this._widget.setProperty(hmUI.prop.MORE, {
+              ...this.position,
+              ...this.size,
+              content: value,
+            });
         }
         break;
     }
   }
 }
 
-export declare interface NativeWidgetPolylineAttributes {
-  color?: string;
-  line_color?: string;
-  lw?: number;
-  line_width?: number;
+export declare interface NativeWidgetQRCodeAttributes {
+  content: string;
 }

@@ -26,6 +26,10 @@
     },
     "./jsx-runtime": {
       "types": "./jsx-runtime.d.ts"
+    },
+    "./zeppos": {
+      "default": "./dist/platform/zeppos/index.js",
+      "types": "./types/platform/zeppos/index.js"
     }
   },
   "devDependencies": {

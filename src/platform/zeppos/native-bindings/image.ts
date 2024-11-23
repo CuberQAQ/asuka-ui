@@ -1,9 +1,9 @@
 import * as hmUI from '@zos/ui';
-import { RenderWidget, WidgetFactory } from '../../core/base.js';
-import { Size, Coordinate, Constraints } from '../../core/layout.js';
-import { assert } from '../../debug/index.js';
+import { RenderWidget, WidgetFactory } from'../../../core/base.js';
+import { Size, Coordinate, Constraints } from'../../../core/layout.js';
+import { assert } from'../../../debug/index.js';
 import { px } from '@zos/utils';
-import { PreferSizeManager } from '../../tools/widget.js';
+import { PreferSizeManager } from'../../../tools/widget.js';
 
 type HmWidget = any; 
 const defaultProps = {};

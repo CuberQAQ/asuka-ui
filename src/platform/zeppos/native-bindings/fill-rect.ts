@@ -1,21 +1,20 @@
 import * as hmUI from '@zos/ui';
-import { RenderWidget, WidgetFactory } from '../../core/base.js';
-import { Size, Coordinate, Constraints } from '../../core/layout.js';
-import { assert } from '../../debug/index.js';
+import { RenderWidget, WidgetFactory } from'../../../core/base.js';
+import { Size, Coordinate, Constraints } from'../../../core/layout.js';
+import { assert } from'../../../debug/index.js';
 import { px } from '@zos/utils';
-import { PreferSizeManager } from '../../tools/widget.js';
+import { PreferSizeManager } from'../../../tools/widget.js';
 
 type HmWidget = any;
 const defaultProps = {
-  content: 'null',
+  color: 0xcc0000,
 };
-// Not support bg_x bg_y bg_w bg_h, please use container or stack etc to add background decoration.
-export class NativeWidgetQRCode extends RenderWidget {
+export class NativeWidgetFillRect extends RenderWidget {
   _widget: HmWidget | null = null;
   _preferredSizeManager = new PreferSizeManager(this);
   _props: Record<string, any> = { ...defaultProps };
   sizedByParent: boolean = false;
-  onCommit({ 
+  onCommit({
     size,
     position,
     widgetFactory,
@@ -28,7 +27,7 @@ export class NativeWidgetQRCode extends RenderWidget {
   }): void {
     if (initial) {
       assert(this._widget === null);
-      this._widget = widgetFactory.createWidget((hmUI.widget as any).QRCODE, {
+      this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
         ...this._props,
         ...position,
         ...size,
@@ -58,14 +57,32 @@ export class NativeWidgetQRCode extends RenderWidget {
     super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
     switch (key) {
-      case 'content':
+      case 'r':
+        case 'radius':
         {
-          this._props.content = value;
+          this._props.radius = value;
           if (this._widget)
             this._widget.setProperty(hmUI.prop.MORE, {
-              ...this.position,
               ...this.size,
-              content: value,
+              ...this.position,
+              ...this._props,
+            });
+        }
+        break;
+      case 'color':
+        {
+          this._props.color = value;
+          if (this._widget) this._widget.setProperty(hmUI.prop.COLOR, value);
+        }
+        break;
+      case 'alpha':
+        {
+          this._props.alpha = value;
+          if (this._widget)
+            this._widget.setProperty(hmUI.prop.MORE, {
+              ...this.size,
+              ...this.position,
+              ...this._props,
             });
         }
         break;
@@ -73,6 +90,9 @@ export class NativeWidgetQRCode extends RenderWidget {
   }
 }
 
-export declare interface NativeWidgetQRCodeAttributes {
-  content: string;
+export declare interface NativeWidgetFillRectAttributes {
+  r?: number
+  radius?: number
+  color?: number
+  alpha?: number
 }
