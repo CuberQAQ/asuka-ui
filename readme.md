@@ -8,3 +8,6 @@ Zepp OS UI 框架
 - 高扩展性：
   只需实现 Asuka UI 的组件接口，即可快速创建“Element”级的自定义组件，快速复用已有代码；
   反之，Asuka UI 可以挂载到 hmUI 或是某个 VIEW_CONTAINER 上，并指定长、宽，并能创建多个根节点，将 Asuka UI 当成一个 widget 使用。
+
+## 文档
+懒得写，所以没有 QAQ
