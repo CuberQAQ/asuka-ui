@@ -1,5 +1,5 @@
 # Asuka UI
-
+Zepp OS UI 框架
 ## Features
 - 虚拟 DOM：类似 HTML DOM，管理组件之间的层级关系
 - 布局引擎：实现类似 Flutter 的布局约束模型，支持如 Flex 布局，Padding 等属性，自动计算布局
