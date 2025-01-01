@@ -1,0 +1,1 @@
+{"version":3,"file":"column.js","sourceRoot":"","sources":["../../../src/components/layout/column.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,IAAI,EAAE,MAAM,qBAAqB,CAAC;AAC3C,OAAO,EAAE,gBAAgB,EAAE,MAAM,WAAW,CAAC;AAE7C,MAAM,OAAO,kBAAmB,SAAQ,gBAAgB;IACtD,UAAU,GAAS,IAAI,CAAC,QAAQ,CAAC;CAClC"}
