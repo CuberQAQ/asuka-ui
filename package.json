@@ -11,25 +11,24 @@
   "files": [
     "./dist",
     "./src",
-    "./types",
     "./readme.md",
     "./package.json"
   ],
   "exports": {
     ".": {
       "default": "./dist/index.js",
-      "types": "./types/index.d.ts"
+      "types": "./src/index.ts"
     },
     "./solid": {
       "default": "./dist/solid.js",
-      "types": "./types/solid.d.ts"
+      "types": "./src/solid.ts"
     },
     "./jsx-runtime": {
       "types": "./jsx-runtime.d.ts"
     },
     "./zeppos": {
       "default": "./dist/platform/zeppos/index.js",
-      "types": "./types/platform/zeppos/index.js"
+      "types": "./src/platform/zeppos/index.ts"
     }
   },
   "devDependencies": {

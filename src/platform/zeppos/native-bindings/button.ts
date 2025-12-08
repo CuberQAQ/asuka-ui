@@ -223,4 +223,6 @@ export declare interface NativeWidgetButtonAttributes extends PreferSizeAttribut
   ps?: string;
   psrc?: string;
   press_src?: string;
+
+  onClick?: Function;
 }

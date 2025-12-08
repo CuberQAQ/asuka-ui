@@ -5,7 +5,11 @@ import { assert } from '../../debug/index.js';
 export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
   sizedByParent: boolean = true;
   _align = Alignment.center;
+  _widthFactor: number | null = null;
+  _heightFactor: number | null = null;
+
   performResize(): void {
+    // only when sizedByParent (widthFactor == null && heightFactor == null)
     assert(this._constraints != null);
     this.size = this._constraints!.biggest;
   }
@@ -20,6 +24,26 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
         widgetFactory: this._widgetFactory!,
       });
       assert(child.size != null);
+
+      // when widthFactor or heightFactor is defined
+      if (!this.sizedByParent) {
+        this.size = this._constraints!.biggest;
+        if (this._widthFactor !== null) {
+          this.size!.w = child.size!.w * this._widthFactor;
+          if(this.size!.w < this._constraints!.minWidth){
+            this.size!.w = this._constraints!.minWidth;
+          }
+          if(this.size!.h < this._constraints!.minHeight){
+            this.size!.h = this._constraints!.minHeight;
+          }
+          // TODO
+          assert(this._constraints!.testSize(this.size!));
+        }
+        if (this._heightFactor !== null) {
+          this.size!.h = child.size!.h * this._heightFactor;
+        }
+      }
+
       child.offset = this._align.calcOffset(this.size!, child.size!);
     }
   }
@@ -54,6 +78,24 @@ export class LayoutWidgetAlign extends RenderNodeWithSingleChild {
           }
         }
         break;
+      case 'widthFactor':
+        if (this._widthFactor !== value) {
+          this._widthFactor = value;
+          if (this.sizedByParent) {
+            this.sizedByParent = false;
+            this.markSizedByParentChanged();
+          }
+        }
+        break;
+      case 'heightFactor':
+        if (this._heightFactor !== value) {
+          this._heightFactor = value;
+          if (this.sizedByParent) {
+            this.sizedByParent = false;
+            this.markSizedByParentChanged();
+          }
+        }
+        break;
     }
   }
 }
@@ -63,5 +105,7 @@ export declare namespace LayoutWidgetAlign {
     x?: number;
     y?: number;
     alignment?: Alignment;
+    widthFactor?: number;
+    heightFactor?: number;
   }
 }

@@ -5,6 +5,7 @@ export class LayoutWidgetZStack extends RenderNodeWithMultiChildren {
     _align = Alignment.topLeft;
     _fit = StackFit.loose;
     _computeSize(constraints) {
+        console.log('[AsukaUI]', 'stack', 'computeSize');
         let hasNonPositionedChild = false;
         if (this._childRenderNodeCount === 0) {
             return Size.isFinite(constraints.biggest)
@@ -58,7 +59,9 @@ export class LayoutWidgetZStack extends RenderNodeWithMultiChildren {
         // If accurate size for child can be computed, use tighten constraints to make sure child obey that;
         // otherwise, use loosen constraints.
         let childConstraints = new Constraints({});
+        console.log('[AsukaUI]', `child._left=${child._left}, child._right=${child._right}`);
         if (child._left !== null && child._right !== null) {
+            console.log('[AsukaUI]', 'stack', 'pt0');
             childConstraints = childConstraints.tighten({
                 width: this.size.w - child._left - child._right,
             });
@@ -66,6 +69,7 @@ export class LayoutWidgetZStack extends RenderNodeWithMultiChildren {
         else if (child._width !== null) {
             childConstraints = childConstraints.tighten({ width: child._width });
         }
+        console.log('[AsukaUI]', 'stack', 'childConstraints1', JSON.stringify(childConstraints));
         if (child._top !== null && child._bottom !== null) {
             childConstraints = childConstraints.tighten({
                 height: this.size.h - child._top - child._bottom,
@@ -74,6 +78,8 @@ export class LayoutWidgetZStack extends RenderNodeWithMultiChildren {
         else if (child._height !== null) {
             childConstraints = childConstraints.tighten({ height: child._height });
         }
+        // TODO test
+        console.log('[AsukaUI]', 'stack', 'childConstraints2', JSON.stringify(childConstraints));
         child.layout(childConstraints, {
             parentUsesSize: true,
             widgetFactory: this._widgetFactory,
@@ -111,6 +117,7 @@ export class LayoutWidgetZStack extends RenderNodeWithMultiChildren {
         // Compute offset for all children while calculate size for positioned children
         this.visitChildren((child) => {
             if (child instanceof LayoutWidgetPositioned) {
+                console.log('[AsukaUI]', 'stack', 'child2', child.nodeName);
                 // Can not specify the three options at the same time (because they may have conflict)
                 assert(child._left === null ||
                     child._right === null ||
@@ -175,7 +182,7 @@ export class LayoutWidgetPositioned extends RenderNodeProxy {
             case 'r':
             case 'right':
                 {
-                    if (value !== this._left) {
+                    if (value !== this._right) {
                         this._right = value;
                         this.markNeedsLayout();
                     }

@@ -24,10 +24,10 @@ export class PreferSizeManager {
         return {
             w: this._preferredSize?.w ??
                 this._defaultSize?.w ??
-                Number.POSITIVE_INFINITY,
+                0, // TODO raw: Number.POSITIVE_INFINITY,
             h: this._preferredSize?.h ??
                 this._defaultSize?.h ??
-                Number.POSITIVE_INFINITY,
+                0, // TODO raw: Number.POSITIVE_INFINITY,
         };
     }
     /**

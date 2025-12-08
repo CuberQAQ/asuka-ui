@@ -9,7 +9,8 @@ export * from './native-bindings/index.js'
 
 export const platform: Platform = {
   getWidgetFactorySize(mount: WidgetFactory) {
-    if (mount === hmUI) {
+    if ('setStatusBarVisible' in mount) {
+      
       let { width, height } = getDeviceInfo();
       return { w: width, h: height };
     } else {
@@ -18,10 +19,10 @@ export const platform: Platform = {
           w: (mount as any).getProperty(hmUI.prop.W),
           h: (mount as any).getProperty(hmUI.prop.H),
         };
-      } catch {
-        reportError('createFrame', Error('Get View size failed'));
+      } catch(e) {
+        reportError('Get View size failed when create frame.\nMake sure your widgetFatory is valid', e);
       }
-      throw 'Get View size failed';
+      throw Error('Get View size failed');
     }
   },
 };

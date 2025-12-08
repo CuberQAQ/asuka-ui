@@ -1,4 +1,4 @@
-import { LayoutManagerFactory } from './layout/index.js'
+export { LayoutManagerFactory } from './layout/index.js'
 
 export * from './layout/index.js'
 

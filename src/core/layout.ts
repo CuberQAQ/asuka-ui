@@ -43,8 +43,8 @@ export class Constraints {
   }) {
     if (isNaN(minHeight ?? NaN)) minHeight = 0;
     if (isNaN(minWidth ?? NaN)) minWidth = 0;
-    if (isNaN(maxHeight ?? NaN)) maxHeight = 0;
-    if (isNaN(maxWidth ?? NaN)) maxWidth = 0;
+    if (isNaN(maxHeight ?? NaN)) maxHeight = Number.POSITIVE_INFINITY;
+    if (isNaN(maxWidth ?? NaN)) maxWidth = Number.POSITIVE_INFINITY;
     if (minHeight < 0) minHeight = 0;
     if (minWidth < 0) minWidth = 0;
     if (maxHeight < minHeight) maxHeight = minHeight;
@@ -61,12 +61,26 @@ export class Constraints {
    * @param size
    * @returns
    */
-  static createTight(size: NullableSize) {
+  static createTight(size: Size) {
     return new Constraints({
       minWidth: size.w,
       maxWidth: size.w,
       minHeight: size.h,
       maxHeight: size.h,
+    });
+  }
+  /**
+   * **在给定的方向上创建严格约束，其它方向保持宽松**
+   * @description 给定一个`Size`对象，返回一个`Constraints`对象，
+   * @param size
+   * @returns
+   */
+  static tightFor(size: NullableSize) {
+    return new Constraints({
+      minWidth: size.w ?? 0,
+      maxWidth: size.w ?? Number.POSITIVE_INFINITY,
+      minHeight: size.h ?? 0,
+      maxHeight: size.h ?? Number.POSITIVE_INFINITY,
     });
   }
   static isValid(constraints: Constraints | null) {

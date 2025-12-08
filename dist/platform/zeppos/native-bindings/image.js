@@ -11,7 +11,7 @@ export class NativeWidgetImage extends RenderWidget {
     onCommit({ size, position, widgetFactory, initial, }) {
         if (initial) {
             assert(this._widget === null);
-            this._widget = widgetFactory.createWidget(hmUI.widget.FILL_RECT, {
+            this._widget = widgetFactory.createWidget(hmUI.widget.IMG, {
                 ...this._props,
                 ...position,
                 ...size,
@@ -31,7 +31,9 @@ export class NativeWidgetImage extends RenderWidget {
         widgetFactory.deleteWidget(this._widget);
     }
     performResize() { }
-    performLayout() { }
+    performLayout() {
+        this._preferredSizeManager.chooseSize();
+    }
     _updateDefaultSize() {
         if (this._props.src) {
             let { width, height } = hmUI.getImageInfo(this._props.src);
@@ -42,13 +44,6 @@ export class NativeWidgetImage extends RenderWidget {
         super.setProperty(key, value);
         this._preferredSizeManager.setProperty(key, value);
         switch (key) {
-            case 'color':
-                if (value !== this._props.color) {
-                    this._props.color = value;
-                    if (this._widget)
-                        this._widget.setProperty(hmUI.prop.COLOR, value);
-                }
-                break;
             // case 'alpha':
             //   {
             //     if (value !== this._props.alpha) {
@@ -138,6 +133,7 @@ export class NativeWidgetImage extends RenderWidget {
                 {
                     if (value !== this._props.src) {
                         this._props.src = value;
+                        this._updateDefaultSize();
                         if (this._widget)
                             this._widget.setProperty(hmUI.prop.SRC, value);
                     }

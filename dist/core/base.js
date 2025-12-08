@@ -381,7 +381,13 @@ export class RenderNode extends AsukaNode {
     set size(size) {
         assert(() => {
             if (!Size.isValid(size)) {
-                throw new Error(`Invalid size: ${JSON.stringify(size)}, at ${this.nodeName}, constraint: ${JSON.stringify(this._constraints)}`);
+                const size_stack = [];
+                let current = this;
+                while (current != null) {
+                    size_stack.push(current);
+                    current = current.parentNode;
+                }
+                throw new Error(`Invalid size: ${JSON.stringify(size)}, at ${this.nodeName}, constraint: ${JSON.stringify(this._constraints)}, stack: ${size_stack.map((node) => `[${node.nodeName} constrains: ${isRenderNode(node) ? JSON.stringify(node._constraints) : '-'}, size: ${isRenderNode(node) ? JSON.stringify(node.size) : '-'}]`).join('\n -> \n')}`);
             }
             return true;
         });

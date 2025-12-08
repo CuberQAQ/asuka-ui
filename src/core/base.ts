@@ -490,8 +490,14 @@ export abstract class RenderNode extends AsukaNode {
   set size(size: Size | null) {
     assert(() => {
       if (!Size.isValid(size)) {
+        const size_stack = [];
+        let current: AsukaNode | null = this;
+        while (current != null) {
+          size_stack.push(current);
+          current = current.parentNode;
+        }
         throw new Error(
-          `Invalid size: ${JSON.stringify(size)}, at ${this.nodeName}, constraint: ${JSON.stringify(this._constraints)}`,
+          `Invalid size: ${JSON.stringify(size)}, at ${this.nodeName}, constraint: ${JSON.stringify(this._constraints)}, stack: ${size_stack.map((node) => `[${node.nodeName} constrains: ${isRenderNode(node) ? JSON.stringify((node as RenderNode)._constraints) : '-'}, size: ${isRenderNode(node) ? JSON.stringify((node as RenderNode).size) : '-'}]`).join('\n -> \n')}`,
         );
       }
       return true;
@@ -1441,19 +1447,19 @@ export class AsukaUI {
     let size = options && options.size;
     let offset = (options && options.offset) || { x: 0, y: 0 };
     if (!size) {
-    //   if (mount === hmUI) {
-    //     let { width, height } = getDeviceInfo();
-    //     size = { w: width, h: height };
-    //   } else {
-    //     try {
-    //       size = {
-    //         w: (mount as any).getProperty(hmUI.prop.W),
-    //         h: (mount as any).getProperty(hmUI.prop.H),
-    //       };
-    //     } catch {
-    //       reportError('createFrame', Error('Get View size failed'));
-    //     }
-    //   }
+      //   if (mount === hmUI) {
+      //     let { width, height } = getDeviceInfo();
+      //     size = { w: width, h: height };
+      //   } else {
+      //     try {
+      //       size = {
+      //         w: (mount as any).getProperty(hmUI.prop.W),
+      //         h: (mount as any).getProperty(hmUI.prop.H),
+      //       };
+      //     } catch {
+      //       reportError('createFrame', Error('Get View size failed'));
+      //     }
+      //   }
 
       size = this.platform.getWidgetFactorySize(mount);
     }
@@ -1604,5 +1610,5 @@ export class AsukaUI {
 }
 
 export interface Platform {
-  getWidgetFactorySize(wf: WidgetFactory): Size
+  getWidgetFactorySize(wf: WidgetFactory): Size;
 }

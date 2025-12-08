@@ -10,6 +10,7 @@ export class NativeWidgetStrokeRect extends RenderWidget {
     _widget = null;
     _preferredSizeManager = new PreferSizeManager(this);
     _props = { ...defaultProps };
+    _alpha = 255;
     sizedByParent = false;
     onCommit({ size, position, widgetFactory, initial, }) {
         if (initial) {
@@ -19,6 +20,9 @@ export class NativeWidgetStrokeRect extends RenderWidget {
                 ...position,
                 ...size,
             });
+            if (this._alpha !== 255) {
+                this._widget?.setAlpha(this._alpha);
+            }
         }
         else {
             assert(this._widget != null);
@@ -81,6 +85,15 @@ export class NativeWidgetStrokeRect extends RenderWidget {
                     this._props.line_width = value;
                     if (this._widget)
                         this._widget.setProperty(hmUI.prop.LINE_WIDTH, value);
+                }
+                break;
+            case 'alpha':
+                {
+                    if (this._alpha !== value) {
+                        this._alpha = value;
+                        if (this._widget)
+                            this._widget.setAlpha(value);
+                    }
                 }
                 break;
         }

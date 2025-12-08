@@ -3,7 +3,7 @@ import { RenderWidget, WidgetFactory } from'../../../core/base.js';
 import { Size, Coordinate, Constraints } from'../../../core/layout.js';
 import { assert } from'../../../debug/index.js';
 import { px } from '@zos/utils';
-import { PreferSizeManager } from'../../../tools/widget.js';
+import { PreferSizeAttributesMixin, PreferSizeManager } from'../../../tools/widget.js';
 import { min } from'../../../tools/index.js';
 
 type HmWidget = any;
@@ -91,7 +91,7 @@ export class NativeWidgetCircle extends RenderWidget {
   }
 }
 
-export declare interface NativeWidgetCircleAttributes {
+export declare interface NativeWidgetCircleAttributes extends PreferSizeAttributesMixin {
   r?: number;
   radius?: number;
   color?: number;

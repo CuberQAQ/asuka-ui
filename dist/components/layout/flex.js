@@ -37,14 +37,14 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
                 {
                     if (value !== this._mainAxisSize) {
                         this._mainAxisSize = value;
-                        if (this._mainAxisSize === MainAxisSize.max) {
-                            this.sizedByParent = true;
-                            this.markSizedByParentChanged();
-                        }
-                        else {
-                            this.sizedByParent = false;
-                            this.markSizedByParentChanged();
-                        }
+                        // TODO 不应该加
+                        // if (this._mainAxisSize === MainAxisSize.max) {
+                        //   this.sizedByParent = true;
+                        //   this.markSizedByParentChanged();
+                        // } else {
+                        //   this.sizedByParent = false;
+                        //   this.markSizedByParentChanged();
+                        // }
                         this.markNeedsLayout();
                     }
                 }
@@ -93,8 +93,9 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
      * 直接maxSize就完事儿了
      */
     performResize() {
-        assert(this._constraints != null);
-        this.size = this._constraints.biggest;
+        // TODO 这里不应该，因为无论何种情况，sizedByParent都是false
+        // assert(this._constraints != null);
+        // this.size = this._constraints!.biggest;
     }
     _getFlex(child) {
         return child instanceof LayoutWidgetFlexible ? child._flex : 0;
@@ -154,12 +155,12 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
                 if (this._crossAxisAlignment === CrossAxisAlignment.stretch) {
                     switch (this._direction) {
                         case Axis.horizontal:
-                            innerConstraints = Constraints.createTight({
+                            innerConstraints = Constraints.tightFor({
                                 h: constraints.maxHeight,
                             });
                             break;
                         case Axis.vertical:
-                            innerConstraints = Constraints.createTight({
+                            innerConstraints = Constraints.tightFor({
                                 w: constraints.maxWidth,
                             });
                             break;
@@ -186,8 +187,8 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
                 });
                 assert(child.size != null);
                 let childSize = child.size;
-                allocatedSize += this._getMainSize(childSize);
-                crossSize += max(crossSize, this._getCrossSize(childSize));
+                allocatedSize += this._getMainSize(childSize); // TODO
+                crossSize = max(crossSize, this._getCrossSize(childSize)); // TODO bug? raw:+=
             }
         });
         // Distribute free space to flexible children

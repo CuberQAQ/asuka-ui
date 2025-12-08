@@ -6,12 +6,13 @@ import { px } from '@zos/utils';
 const defaultProps = {
     text: 'text',
     color: 0xffffff,
-    text_size: Number(px(36)),
+    text_size: Number(px(24)),
     align_h: hmUI.align.CENTER_H,
     align_v: hmUI.align.CENTER_V,
 };
 export class NativeWidgetText extends RenderWidget {
     _widget = null;
+    _alpha = 255;
     _props = { ...defaultProps };
     sizedByParent = false;
     onCommit({ size, position, widgetFactory, initial, }) {
@@ -22,6 +23,9 @@ export class NativeWidgetText extends RenderWidget {
                 ...position,
                 ...size,
             });
+            if (this._alpha !== 255) {
+                this._widget?.setAlpha(this._alpha);
+            }
         }
         else {
             assert(this._widget != null);
@@ -106,6 +110,50 @@ export class NativeWidgetText extends RenderWidget {
                         this._widget.setProperty(hmUI.prop.TEXT_STYLE, value);
                 }
                 break;
+            case 'align_h':
+                {
+                    this._props.align_h = value;
+                    if (this._widget)
+                        this._widget.setProperty(hmUI.prop.ALIGN_H, value);
+                }
+                break;
+            case 'align_v':
+                {
+                    this._props.align_v = value;
+                    if (this._widget)
+                        this._widget.setProperty(hmUI.prop.ALIGN_V, value);
+                }
+                break;
+            case 'line_space':
+                {
+                    this._props.line_space = value;
+                    if (this._widget)
+                        this._widget.setProperty(hmUI.prop.LINE_SPACE, value);
+                }
+                break;
+            case 'char_space':
+                {
+                    this._props.char_space = value;
+                    if (this._widget)
+                        this._widget.setProperty(hmUI.prop.CHAR_SPACE, value);
+                }
+                break;
+            case 'font':
+                {
+                    this._props.font = value;
+                    if (this._widget)
+                        this._widget.setProperty(hmUI.prop.FONT, value);
+                }
+                break;
+            case 'alpha':
+                {
+                    if (value !== this._alpha) {
+                        this._alpha = value;
+                        if (this._widget) {
+                            this._widget?.setAlpha(value);
+                        }
+                    }
+                }
         }
     }
 }

@@ -1,6 +1,9 @@
 import { LayoutWidgetAlign } from './align.js';
+import { LayoutWidgetAspectRatio } from './aspect-ratio.js';
 import { LayoutWidgetCenter } from './center.js';
 import { LayoutWidgetColumn } from './column.js';
+import { LayoutWidgetConstrainedBox } from './constrained-box.js';
+import { LayoutWidgetFlexibleWeb, LayoutWidgetFlexWeb } from './flex-web.js';
 import { LayoutWidgetExpanded, LayoutWidgetFlex, LayoutWidgetFlexible,
 // LayoutWidgetSpacer,
  } from './flex.js';
@@ -30,6 +33,10 @@ export const LayoutManagerFactory = {
                 return new LayoutWidgetFlex(null, type);
             case 'flexible':
                 return new LayoutWidgetFlexible(null, type);
+            case 'flex-web':
+                return new LayoutWidgetFlexWeb(null, type);
+            case 'flexible-web':
+                return new LayoutWidgetFlexibleWeb(null, type);
             case 'expanded':
                 return new LayoutWidgetExpanded(null, type);
             // case 'spacer':
@@ -45,6 +52,13 @@ export const LayoutManagerFactory = {
                 return new LayoutWidgetZStack(null, type);
             case 'positioned':
                 return new LayoutWidgetPositioned(null, type);
+            case 'constrained-box':
+            case 'constrainedbox':
+            case 'constrained':
+                return new LayoutWidgetConstrainedBox(null, type);
+            case 'aspect-ratio':
+            case 'aspectratio':
+                return new LayoutWidgetAspectRatio(null, type);
             default:
                 return null;
         }

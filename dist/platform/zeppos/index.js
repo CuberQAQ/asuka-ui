@@ -5,7 +5,7 @@ import { reportError } from '../../debug/index.js';
 export * from './native-bindings/index.js';
 export const platform = {
     getWidgetFactorySize(mount) {
-        if (mount === hmUI) {
+        if ('setStatusBarVisible' in mount) {
             let { width, height } = getDeviceInfo();
             return { w: width, h: height };
         }
@@ -16,10 +16,10 @@ export const platform = {
                     h: mount.getProperty(hmUI.prop.H),
                 };
             }
-            catch {
-                reportError('createFrame', Error('Get View size failed'));
+            catch (e) {
+                reportError('Get View size failed when create frame.\nMake sure your widgetFatory is valid', e);
             }
-            throw 'Get View size failed';
+            throw Error('Get View size failed');
         }
     },
 };
