@@ -2,6 +2,7 @@ import { RenderNodeProxy, RenderNodeWithMultiChildren, } from '../../core/base.j
 import { Axis, Constraints, CrossAxisAlignment, FlexFit, HorizontalDirection, MainAxisAlignment, MainAxisSize, VerticalDirection, flipAxis, } from '../../core/layout.js';
 import { assert } from '../../debug/index.js';
 import { max } from '../../tools/index.js';
+import { timeit } from '../../decorator/debug.js';
 export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
     _direction = Axis.vertical;
     _mainAxisAlignment = MainAxisAlignment.start;
@@ -276,6 +277,7 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
             allocatedSize: allocatedSize,
         };
     }
+    @timeit({ extra: "Flex" })
     performLayout() {
         assert(this._widgetFactory != null);
         assert(this._constraints != null);

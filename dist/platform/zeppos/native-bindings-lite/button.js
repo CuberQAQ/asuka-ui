@@ -1,0 +1,179 @@
+import * as hmUI from '@zos/ui';
+import { AsukaEvent } from '../../../core/base.js';
+import { assert } from '../../../debug/index.js';
+import { px } from '@zos/utils';
+import { LiteWidget } from './lite-widget.js';
+const defaultProps = {
+    text_size: px(36),
+};
+export class LiteWidgetButton extends LiteWidget {
+    _widget = null;
+    _props = { ...defaultProps };
+    onCommit({ size, position, widgetFactory, initial, }) {
+        if (initial) {
+            assert(this._widget === null);
+            this._widget = widgetFactory.createWidget(hmUI.widget.BUTTON, {
+                ...this._props,
+                ...position,
+                ...size,
+                click_func: () => {
+                    const e = new AsukaEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                    });
+                    e.target = this;
+                    this.dispatchEvent(e);
+                },
+                longpress_func: () => {
+                    const e = new AsukaEvent('longpress', {
+                        bubbles: true,
+                        cancelable: true,
+                    });
+                    e.target = this;
+                    this.dispatchEvent(e);
+                },
+            });
+        }
+        else {
+            assert(this._widget != null);
+            this._widget.setProperty(hmUI.prop.MORE, {
+                ...this._props,
+                ...position,
+                ...size,
+            });
+        }
+    }
+    onDestroy(widgetFactory) {
+        assert(widgetFactory !== null && this._widget !== null);
+        widgetFactory.deleteWidget(this._widget);
+    }
+    // _updateDefaultSize() {
+    //   if (this._props.normal_src) {
+    //     let { width, height } = (hmUI as any).getImageInfo(
+    //       this._props.normal_src,
+    //     );
+    //   }
+    // }
+    setProperty(key, value) {
+        super.setProperty(key, value);
+        switch (key) {
+            case 'text':
+                {
+                    if (this._props.text !== value) {
+                        this._props.text = value;
+                        if (this._widget)
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this.size,
+                                ...this.position,
+                                text: value,
+                            });
+                    }
+                }
+                break;
+            case 'color':
+                {
+                    if (this._props.color !== value) {
+                        this._props.color = value;
+                        if (this._widget)
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this.size,
+                                ...this.position,
+                                color: value,
+                            });
+                    }
+                }
+                break;
+            case 'size':
+            case 'ts':
+            case 'text_size':
+                {
+                    if (this._props.text_size !== value) {
+                        this._props.text_size = value;
+                        if (this._widget)
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this.size,
+                                ...this.position,
+                                text_size: value,
+                            });
+                    }
+                }
+                break;
+            case 'nc':
+            case 'ncolor':
+            case 'normal_color':
+                {
+                    if (this._props.normal_color !== value) {
+                        this._props.normal_color = value;
+                        if (this._widget)
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this.size,
+                                ...this.position,
+                                normal_color: value,
+                            });
+                    }
+                }
+                break;
+            case 'pc':
+            case 'pcolor':
+            case 'press_color':
+                {
+                    if (this._props.press_color !== value) {
+                        this._props.press_color = value;
+                        if (this._widget)
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this.size,
+                                ...this.position,
+                                press_color: value,
+                            });
+                    }
+                }
+                break;
+            case 'r':
+            case 'radius':
+                {
+                    if (this._props.radius !== value) {
+                        this._props.radius = value;
+                        if (this._widget)
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this.size,
+                                ...this.position,
+                                radius: value,
+                            });
+                    }
+                }
+                break;
+            case 'ns':
+            case 'nsrc':
+            case 'normal_src':
+                {
+                    if (this._props.normal_src !== value) {
+                        this._props.normal_src = value;
+                        // this._updateDefaultSize();
+                        if (this._widget)
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this.size,
+                                ...this.position,
+                                normal_src: value,
+                            });
+                    }
+                }
+                break;
+            case 'ps':
+            case 'psrc':
+            case 'press_src':
+                {
+                    if (this._props.press_src !== value) {
+                        this._props.press_src = value;
+                        if (this._widget)
+                            this._widget.setProperty(hmUI.prop.MORE, {
+                                ...this.size,
+                                ...this.position,
+                                press_src: value,
+                            });
+                    }
+                }
+                break;
+        }
+    }
+}
+//# sourceMappingURL=button.js.map

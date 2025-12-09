@@ -3,6 +3,7 @@ import hmUI from '@zos/ui';
 import { getDeviceInfo } from '@zos/device';
 import { reportError } from '../../debug/index.js';
 export * from './native-bindings/index.js';
+export * from './native-bindings-lite/index.js';
 export const platform = {
     getWidgetFactorySize(mount) {
         if ('setStatusBarVisible' in mount) {

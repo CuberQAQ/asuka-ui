@@ -1,13 +1,16 @@
 import { RenderNodeWithMultiChildren } from '../../core/base.js';
 import { Constraints } from '../../core/layout.js';
 import { assert } from '../../debug/index.js';
+import { timeit } from '../../decorator/debug.js';
 
 export class LayoutWidgetVStack extends RenderNodeWithMultiChildren {
+  gap: number = 0;
   sizedByParent: boolean = true;
   performResize(): void {
     assert(this._constraints != null);
     this.size = this._constraints!.biggest;
   }
+  @timeit()
   performLayout(): void {
     assert(this.size != null);
     assert(this._widgetFactory != null);
@@ -22,21 +25,28 @@ export class LayoutWidgetVStack extends RenderNodeWithMultiChildren {
       );
       assert(child.size != null);
       leftedHeight -= child.size!.h;
+      leftedHeight -= this.gap;
     });
 
     // offset
-    let offsetY = 0
-    this.visitChildren(child=>{
-        let offsetX = (this.size!.w - child.size!.w) / 2 // 水平方向居中
-        child.offset = {x: offsetX, y: offsetY}
-        offsetY += child.size!.h
-    })
+    let offsetY = 0;
+    this.visitChildren((child) => {
+      let offsetX = (this.size!.w - child.size!.w) / 2; // 水平方向居中
+      child.offset = { x: offsetX, y: offsetY };
+      offsetY += child.size!.h + this.gap;
+    });
   }
   performCommit(): void {}
+  setProperty(key: string, value: any): void {
+    if (key === 'gap') {
+      this.gap = value;
+      this.markNeedsLayout();
+    }
+  }
 }
 
 export declare namespace LayoutWidgetVStack {
   export interface Attributes {
-
+    gap?: number;
   }
 }

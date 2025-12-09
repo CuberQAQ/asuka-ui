@@ -1,9 +1,12 @@
 import * as hmUI from '@zos/ui';
-import { AsukaEvent, RenderWidget, WidgetFactory } from'../../../core/base.js';
-import { Size, Coordinate, Constraints } from'../../../core/layout.js';
-import { assert } from'../../../debug/index.js';
+import { AsukaEvent, RenderWidget, WidgetFactory } from '../../../core/base.js';
+import { Size, Coordinate, Constraints } from '../../../core/layout.js';
+import { assert } from '../../../debug/index.js';
 import { px } from '@zos/utils';
-import { PreferSizeAttributesMixin, PreferSizeManager } from'../../../tools/widget.js';
+import {
+  PreferSizeAttributesMixin,
+  PreferSizeManager,
+} from '../../../tools/widget.js';
 
 type HmWidget = any;
 const defaultProps = {
@@ -33,20 +36,20 @@ export class NativeWidgetButton extends RenderWidget {
         ...position,
         ...size,
         click_func: () => {
-          this.dispatchEvent(
-            new AsukaEvent('click', {
-              bubbles: true,
-              cancelable: true,
-            }),
-          );
+          const e = new AsukaEvent('click', {
+            bubbles: true,
+            cancelable: true,
+          });
+          e.target = this;
+          this.dispatchEvent(e);
         },
         longpress_func: () => {
-          this.dispatchEvent(
-            new AsukaEvent('longpress', {
-              bubbles: true,
-              cancelable: true,
-            }),
-          );
+          const e = new AsukaEvent('longpress', {
+            bubbles: true,
+            cancelable: true,
+          });
+          e.target = this;
+          this.dispatchEvent(e);
         },
       });
     } else {
@@ -81,7 +84,6 @@ export class NativeWidgetButton extends RenderWidget {
   setProperty(key: string, value: any): void {
     super.setProperty(key, value);
     this._preferredSizeManager.setProperty(key, value);
-    console.log(`set ${key} to ${value}`);
     switch (key) {
       case 'text':
         {
@@ -203,7 +205,8 @@ export class NativeWidgetButton extends RenderWidget {
   }
 }
 
-export declare interface NativeWidgetButtonAttributes extends PreferSizeAttributesMixin {
+export declare interface NativeWidgetButtonAttributes
+  extends PreferSizeAttributesMixin {
   text?: string;
   color?: number;
   size?: number;

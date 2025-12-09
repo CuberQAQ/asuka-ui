@@ -3,7 +3,7 @@ import { AsukaEvent, RenderWidget } from '../../../core/base.js';
 import { Size, Constraints } from '../../../core/layout.js';
 import { assert } from '../../../debug/index.js';
 import { px } from '@zos/utils';
-import { PreferSizeManager } from '../../../tools/widget.js';
+import { PreferSizeManager, } from '../../../tools/widget.js';
 const defaultProps = {
     text_size: px(36),
 };
@@ -19,16 +19,20 @@ export class NativeWidgetButton extends RenderWidget {
                 ...position,
                 ...size,
                 click_func: () => {
-                    this.dispatchEvent(new AsukaEvent('click', {
+                    const e = new AsukaEvent('click', {
                         bubbles: true,
                         cancelable: true,
-                    }));
+                    });
+                    e.target = this;
+                    this.dispatchEvent(e);
                 },
                 longpress_func: () => {
-                    this.dispatchEvent(new AsukaEvent('longpress', {
+                    const e = new AsukaEvent('longpress', {
                         bubbles: true,
                         cancelable: true,
-                    }));
+                    });
+                    e.target = this;
+                    this.dispatchEvent(e);
                 },
             });
         }
@@ -62,7 +66,6 @@ export class NativeWidgetButton extends RenderWidget {
     setProperty(key, value) {
         super.setProperty(key, value);
         this._preferredSizeManager.setProperty(key, value);
-        console.log(`set ${key} to ${value}`);
         switch (key) {
             case 'text':
                 {

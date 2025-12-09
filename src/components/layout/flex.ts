@@ -22,6 +22,7 @@ import {
 } from '../../core/layout.js';
 import { assert } from '../../debug/index.js';
 import { max, min } from '../../tools/index.js';
+import { timeit } from '../../decorator/debug.js';
 
 export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
   _direction: Axis = Axis.vertical;
@@ -302,6 +303,7 @@ export class LayoutWidgetFlex extends RenderNodeWithMultiChildren {
       allocatedSize: allocatedSize,
     };
   }
+  @timeit({ extra: "Flex" })
   performLayout(): void {
     assert(this._widgetFactory != null);
     assert(this._constraints != null);

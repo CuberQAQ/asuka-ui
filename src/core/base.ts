@@ -3,8 +3,8 @@
 // import { splice, findWhere, createAttributeFilter, isElement } from "./util";
 
 // import { getDeviceInfo } from '@zos/device';
-import { assert, reportError } from '../debug/index.js';
-import { objectTag } from '../decorator/debug.js';
+import { assert, PerformTimer, reportError } from '../debug/index.js';
+import { objectTag, timeit } from '../decorator/debug.js';
 import { Constraints, Coordinate, Size } from './layout.js';
 import { NodeType, isRenderNode } from './constants.js';
 import { findWhere, splice } from './utils.js';
@@ -82,6 +82,11 @@ export abstract class AsukaNode {
     /** 节点名称 */
     public nodeName: string,
   ) {}
+
+  // TODO
+  ciallo() {
+    return Math.max(1,2);
+  }
 
   /**------------------属性设置------------------- */
 
@@ -721,9 +726,17 @@ export abstract class RenderNode extends AsukaNode {
 
   /**
    * **布局算法**
+   * 
+   * 传递_widgetFactory
+   * 
+   * 计算子树的重布局边界
+   * 
+   * 计算尺寸和内部布局
+   * 
    * @param constraints 布局约束，要求该RenderNode的尺寸应符合该约束
    * @param parentUsesSize 父节点在 layout 时会不会使用当前节点的 size 信息(也就是当前节点的排版信息对父节点有无影响)；
    */
+  @timeit({ silent: true })
   layout(
     constraints: Constraints,
     {
@@ -731,6 +744,7 @@ export abstract class RenderNode extends AsukaNode {
       widgetFactory,
     }: { parentUsesSize: boolean; widgetFactory: WidgetFactory },
   ): void {
+    const perf = new PerformTimer(`${this.nodeName}-layout`);
     assert(
       widgetFactory != null &&
         typeof widgetFactory.createWidget === 'function' &&
@@ -747,6 +761,8 @@ export abstract class RenderNode extends AsukaNode {
       })(),
     );
     this._widgetFactory = widgetFactory;
+
+    // perf.record('stage1');
 
     // 本节点是否为重布局边界（即布局脏标记是否会传递给本节点的父节点，并触发父节点重新布局）
     let isRelayoutBoundary =
@@ -770,8 +786,11 @@ export abstract class RenderNode extends AsukaNode {
       }
       return;
     }
-    this._constraints = constraints;
 
+
+    
+    // perf.record('stage2');
+    
     // 若原来的`_relayoutBoundary`不为空（也就是上次挂载后已经布局过了，子渲染组件的也一定不为空），且RelayoutBoundary要变了
     if (
       this._relayoutBoundary !== null &&
@@ -782,15 +801,23 @@ export abstract class RenderNode extends AsukaNode {
       // their actual relayout boundary is later.
       this.visitChildren((child) => child._cleanRelayoutBoundary());
     }
+
     this._relayoutBoundary = relayoutBoundary;
+
+    
+    this._constraints = constraints;
+
+    // perf.record('stage3');
 
     if (this.sizedByParent) {
       this.performResize();
     }
 
     this.performLayout();
+
     // markNeedsSemanticsUpdate
     this._needsLayout = false;
+    // perf.record('stage4');
   }
 
   /**
@@ -1000,7 +1027,11 @@ export abstract class RenderNodeWithSingleChild extends RenderNode {
     return false;
   }
   mountChild(child: AsukaNode): boolean {
-    if (this._child !== null) return false;
+    if (this._child !== null) {
+      console.log(`[AsukaUI] warn: when singleChildNode mount child, at ${this.nodeName}, child ${child.nodeName} is not null`);
+      this.unmountChild(this._child);
+      // return false; // TODO 
+    }
     this._child = child;
     this._setupMountingChild(child);
     return true;
@@ -1426,8 +1457,8 @@ export interface NodeFactory {
 
 export class AsukaUI {
   public viewRecord: Record<string | symbol, RenderView | null> = {};
-  protected _activeFrame: RenderView | null = null;
-  protected _nodeFactories: NodeFactory[] = [];
+  _activeFrame: RenderView | null = null;
+  _nodeFactories: NodeFactory[] = [];
   static instance: AsukaUI | null = null;
   constructor(public platform: Platform) {
     assert(AsukaUI.instance === null);
@@ -1561,8 +1592,8 @@ export class AsukaUI {
   refreshSync() {
     if (this._asyncHandler !== null) {
       clearTimeout(this._asyncHandler);
-      this._layoutAndPlace();
     }
+    this._layoutAndPlace();
   }
   /**
    * **添加布局与放置后的任务**
@@ -1577,6 +1608,9 @@ export class AsukaUI {
    * 重新布局时调用的
    */
   _layoutAndPlace() {
+    // TODO debug
+    console.log('[AsukaUI] refresh');
+
     // TODO
     this._asyncHandler = null;
     this._layout();

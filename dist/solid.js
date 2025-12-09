@@ -1,6 +1,7 @@
 /// <reference path="../jsx-runtime.d.ts" />
 import { createRenderer as _createRenderer } from 'solid-js/universal';
 import { AsukaUI, AsukaUnknownNode, isTextNode, assert, } from './index.js';
+const __testNode = new AsukaUnknownNode();
 export const { render, effect, memo, createComponent, createElement, createTextNode, insertNode, insert, spread, setProp, mergeProps, } = _createRenderer({
     createElement(type) {
         // console.log(`[AsukaUI] createElement type=${type}`);

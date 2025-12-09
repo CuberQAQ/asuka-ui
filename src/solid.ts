@@ -9,6 +9,9 @@ import {
   assert,
 } from './index.js';
 
+const __testNode = new AsukaUnknownNode();
+
+
 export const {
   render,
   effect,

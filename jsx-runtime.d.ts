@@ -1,11 +1,14 @@
+// global.d.ts
+import "solid-js";
+
 import { type AsukaNode } from "./src/index.ts"
 import { type LayoutManagerFactory } from "./src/index.ts"
-import { type NativeWidgetAttributesTypeMap } from "./src/platform/zeppos/index.ts"
+import { LiteWidgetAttributesTypeMap, type NativeWidgetAttributesTypeMap } from "./src/platform/zeppos/index.ts"
 
 
-export declare type InsideIntrinsicElements = LayoutManagerFactory.AttributesMap & NativeWidgetAttributesTypeMap
+export declare type InsideIntrinsicElements = LayoutManagerFactory.AttributesMap & NativeWidgetAttributesTypeMap & LiteWidgetAttributesTypeMap
 
-export namespace JSX {
+export declare namespace JSX {
     export type IntrinsicElements = InsideIntrinsicElements
     export type Element = AsukaNode
 }
